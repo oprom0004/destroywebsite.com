@@ -244,6 +244,11 @@ const {
   interface Projectile {
     x: number;
     y: number;
+    startX: number;
+    startY: number;
+    targetX: number;
+    targetY: number;
+    totalDist: number;
     vx: number;
     vy: number;
     type: string;
@@ -268,20 +273,85 @@ const {
   const projectiles: Projectile[] = [];
   const paperShards: PaperShard[] = [];
 
-  function resizeCanvases() {
-    if (!container || !pageCanvas || !fxCanvas) return;
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    pageCanvas.width = w;
-    pageCanvas.height = h;
-    fxCanvas.width = w;
-    fxCanvas.height = h;
-    renderWebpageTemplate(currentDomain, currentTheme);
+  let activeLiveImg: HTMLImageElement | null = null;
+  let isLoadingLive = false;
+
+  function loadLiveWebsiteScreenshot(urlOrDomain: string) {
+    let fullUrl = urlOrDomain.trim();
+    if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+      fullUrl = 'https://' + fullUrl;
+    }
+
+    try {
+      const parsed = new URL(fullUrl);
+      currentDomain = parsed.hostname;
+    } catch {
+      currentDomain = urlOrDomain;
+    }
+
+    isLoadingLive = true;
+    renderScanningHUD(currentDomain);
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    // Direct live visual capture proxy (Microlink API)
+    const proxyUrl = `https://api.microlink.io/?url=${encodeURIComponent(fullUrl)}&screenshot=true&embed=screenshot.url`;
+
+    img.onload = () => {
+      isLoadingLive = false;
+      activeLiveImg = img;
+      renderActiveCanvas();
+    };
+
+    img.onerror = () => {
+      // Fallback to stylized high-fidelity procedural template if CORS or offline
+      isLoadingLive = false;
+      activeLiveImg = null;
+      renderProceduralFallback(currentDomain);
+    };
+
+    img.src = proxyUrl;
   }
 
-  window.addEventListener('resize', resizeCanvases);
+  function renderScanningHUD(domain: string) {
+    if (!pageCtx || !pageCanvas) return;
+    const w = pageCanvas.width;
+    const h = pageCanvas.height;
 
-  function renderWebpageTemplate(domain: string, theme: string) {
+    pageCtx.globalCompositeOperation = 'source-over';
+    pageCtx.fillStyle = '#0f051d';
+    pageCtx.fillRect(0, 0, w, h);
+
+    // Glowing Radar Grid
+    pageCtx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+    pageCtx.lineWidth = 1;
+    for (let x = 0; x < w; x += 40) {
+      pageCtx.beginPath();
+      pageCtx.moveTo(x, 0);
+      pageCtx.lineTo(x, h);
+      pageCtx.stroke();
+    }
+    for (let y = 0; y < h; y += 40) {
+      pageCtx.beginPath();
+      pageCtx.moveTo(0, y);
+      pageCtx.lineTo(w, y);
+      pageCtx.stroke();
+    }
+
+    // Scanning target text
+    pageCtx.fillStyle = '#00F0FF';
+    pageCtx.font = 'bold 20px monospace';
+    pageCtx.textAlign = 'center';
+    pageCtx.fillText(`📡 INTERCEPTING LIVE FEED: ${domain.toUpperCase()}`, w / 2, h / 2 - 20);
+
+    pageCtx.fillStyle = '#FF659C';
+    pageCtx.font = '13px monospace';
+    pageCtx.fillText('Rendering real-world DOM structure & visual layers...', w / 2, h / 2 + 15);
+    pageCtx.textAlign = 'left';
+  }
+
+  function renderActiveCanvas() {
     if (!pageCtx || !pageCanvas) return;
     const w = pageCanvas.width;
     const h = pageCanvas.height;
@@ -290,53 +360,32 @@ const {
     pageCtx.fillStyle = '#FFFFFF';
     pageCtx.fillRect(0, 0, w, h);
 
-    if (theme === 'wiki' || domain.includes('wikipedia')) {
-      pageCtx.fillStyle = '#000000';
-      pageCtx.font = 'bold 22px Georgia, serif';
-      pageCtx.fillText('WIKIPEDIA', w / 2 - 60, 50);
-      pageCtx.font = '12px sans-serif';
-      pageCtx.fillStyle = '#555555';
-      pageCtx.fillText('The Free Encyclopedia · 6,850,000+ Articles', w / 2 - 120, 72);
+    if (activeLiveImg) {
+      // Draw the real live website screenshot fitted to canvas
+      pageCtx.drawImage(activeLiveImg, 0, 0, w, h);
+    } else {
+      renderProceduralFallback(currentDomain);
+    }
 
-      pageCtx.beginPath();
-      pageCtx.arc(w / 2, 130, 42, 0, Math.PI * 2);
-      pageCtx.fillStyle = '#F8FAFC';
-      pageCtx.fill();
-      pageCtx.lineWidth = 2;
-      pageCtx.strokeStyle = '#CBD5E1';
-      pageCtx.stroke();
-      pageCtx.fillStyle = '#1E293B';
-      pageCtx.font = 'bold 28px serif';
-      pageCtx.fillText('W', w / 2 - 14, 140);
+    player.x = w / 2;
+    player.y = 105;
+    player.vx = 0;
+    player.vy = 0;
 
-      pageCtx.font = 'bold 13px sans-serif';
-      pageCtx.fillStyle = '#0645AD';
-      pageCtx.fillText('English · 6,850,000+ entries', 60, 120);
-      pageCtx.fillText('Español · 1,970,000+ artículos', 60, 160);
-      pageCtx.fillText('Français · 2,630,000+ articles', 60, 200);
-      pageCtx.fillText('Deutsch · 2,930,000+ Artikel', w - 240, 120);
-      pageCtx.fillText('日本語 · 1,420,000+ 記事', w - 240, 160);
-      pageCtx.fillText('Русский · 1,990,000+ статей', w - 240, 200);
+    destructionPercent = 0;
+    updateHUD();
+  }
 
-      pageCtx.fillStyle = '#F8F9FA';
-      pageCtx.fillRect(60, 240, w - 120, 180);
-      pageCtx.lineWidth = 1;
-      pageCtx.strokeStyle = '#A2A9B1';
-      pageCtx.strokeRect(60, 240, w - 120, 180);
+  function renderProceduralFallback(domain: string) {
+    if (!pageCtx || !pageCanvas) return;
+    const w = pageCanvas.width;
+    const h = pageCanvas.height;
 
-      pageCtx.fillStyle = '#000000';
-      pageCtx.font = 'bold 16px sans-serif';
-      pageCtx.fillText("Today's Featured Article: Stick Figure & Digital Animation", 80, 275);
-      pageCtx.font = '13px sans-serif';
-      pageCtx.fillStyle = '#202122';
-      pageCtx.fillText('A stick figure is a very simple drawing of a person or animal composed of a few lines, curves, and dots.', 80, 310);
-      pageCtx.fillText('In early internet animation, stick figures were popularized by series such as Xiao Xiao and Pivot Animator.', 80, 335);
-      pageCtx.fillText('Destructible web engines allow real-time tear physics across DOM structures and interactive canvases.', 80, 360);
+    pageCtx.globalCompositeOperation = 'source-over';
+    pageCtx.fillStyle = '#FFFFFF';
+    pageCtx.fillRect(0, 0, w, h);
 
-      pageCtx.fillStyle = '#72777D';
-      pageCtx.font = '11px sans-serif';
-      pageCtx.fillText('Text is available under the Creative Commons Attribution-ShareAlike License 4.0', 80, 480);
-    } else if (theme === 'google' || domain.includes('google')) {
+    if (domain.includes('google')) {
       pageCtx.font = 'bold 48px sans-serif';
       pageCtx.fillStyle = '#4285F4';
       pageCtx.fillText('G', w / 2 - 70, 150);
@@ -371,39 +420,59 @@ const {
       pageCtx.fillText('Google Search', w / 2 - 120, 283);
       pageCtx.fillText("I'm Feeling Lucky", w / 2 + 25, 283);
     } else {
-      pageCtx.fillStyle = '#1E293B';
-      pageCtx.fillRect(40, 40, w - 80, 50);
+      // Modern Clean Web Template
+      pageCtx.fillStyle = '#0f172a';
+      pageCtx.fillRect(0, 0, w, 56);
       pageCtx.fillStyle = '#FFFFFF';
-      pageCtx.font = 'bold 18px sans-serif';
-      pageCtx.fillText(`Official Portal: ${domain.toUpperCase()}`, 60, 72);
+      pageCtx.font = 'bold 16px sans-serif';
+      pageCtx.fillText(`🌐 https://${domain}`, 24, 34);
 
-      pageCtx.fillStyle = '#F1F5F9';
-      pageCtx.fillRect(40, 110, w - 80, 300);
-      pageCtx.fillStyle = '#0F172A';
-      pageCtx.font = 'bold 20px sans-serif';
-      pageCtx.fillText('Active Dashboard & Demolition Target', 60, 150);
+      pageCtx.fillStyle = '#38bdf8';
+      pageCtx.fillRect(w - 140, 14, 116, 28);
+      pageCtx.fillStyle = '#0f172a';
+      pageCtx.font = 'bold 12px sans-serif';
+      pageCtx.fillText('Sign In / Account', w - 130, 32);
 
+      pageCtx.fillStyle = '#1e293b';
+      pageCtx.font = 'bold 32px sans-serif';
+      pageCtx.fillText(`Welcome to ${domain}`, 40, 120);
+
+      pageCtx.fillStyle = '#64748b';
       pageCtx.font = '14px sans-serif';
-      pageCtx.fillStyle = '#475569';
-      pageCtx.fillText('⚠️ Due Today: Final Comprehensive Examination (Weight: 50%)', 60, 200);
-      pageCtx.fillText('💸 Overdue Notice: Tuition Balance $14,200.00 Outstanding', 60, 240);
-      pageCtx.fillText('📊 Academic Attendance: 68% (Warning Notification)', 60, 280);
+      pageCtx.fillText(`This is the live rendered sandbox for ${domain}. You can destroy any element on this page!`, 40, 155);
 
-      pageCtx.fillStyle = '#EF4444';
-      pageCtx.fillRect(60, 320, 220, 44);
+      pageCtx.fillStyle = '#f8fafc';
+      pageCtx.fillRect(40, 190, w - 80, 280);
+      pageCtx.strokeStyle = '#e2e8f0';
+      pageCtx.lineWidth = 1;
+      pageCtx.strokeRect(40, 190, w - 80, 280);
+
+      pageCtx.fillStyle = '#0284c7';
+      pageCtx.fillRect(60, 220, 160, 40);
       pageCtx.fillStyle = '#FFFFFF';
       pageCtx.font = 'bold 14px sans-serif';
-      pageCtx.fillText('SUBMIT HOMEWORK NOW', 80, 348);
+      pageCtx.fillText('Primary Action', 85, 245);
+
+      pageCtx.fillStyle = '#334155';
+      pageCtx.font = '14px sans-serif';
+      pageCtx.fillText('• High-Performance Enterprise Architecture & API Integration', 60, 300);
+      pageCtx.fillText('• Real-Time Cloud Data Synchronizer & Secure Gateways', 60, 335);
+      pageCtx.fillText('• Interactive 2D Destruction Physics Sandbox Online', 60, 370);
     }
-
-    player.x = w / 2;
-    player.y = 105;
-    player.vx = 0;
-    player.vy = 0;
-
-    destructionPercent = 0;
-    updateHUD();
   }
+
+  function resizeCanvases() {
+    if (!container || !pageCanvas || !fxCanvas) return;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    pageCanvas.width = w;
+    pageCanvas.height = h;
+    fxCanvas.width = w;
+    fxCanvas.height = h;
+    renderActiveCanvas();
+  }
+
+  window.addEventListener('resize', resizeCanvases);
 
   // Dynamic Organic Blast Shapes for Different Weapons
   function punchBlastHole(x: number, y: number, baseRadius: number, shape: 'jagged' | 'star' | 'pellet' | 'laser' | 'huge' = 'jagged') {
@@ -518,6 +587,11 @@ const {
       projectiles.push({
         x: gunX,
         y: gunY,
+        startX: gunX,
+        startY: gunY,
+        targetX: hitX,
+        targetY: hitY,
+        totalDist: Math.hypot(hitX - gunX, hitY - gunY),
         vx: (hitX - gunX) / 3,
         vy: (hitY - gunY) / 3,
         type: 'tracer',
@@ -543,6 +617,11 @@ const {
         projectiles.push({
           x: gunX,
           y: gunY,
+          startX: gunX,
+          startY: gunY,
+          targetX: pelletX,
+          targetY: pelletY,
+          totalDist: Math.hypot(pelletX - gunX, pelletY - gunY),
           vx: (pelletX - gunX) / 3,
           vy: (pelletY - gunY) / 3,
           type: 'tracer',
@@ -560,6 +639,11 @@ const {
       projectiles.push({
         x: gunX,
         y: gunY,
+        startX: gunX,
+        startY: gunY,
+        targetX: targetX,
+        targetY: targetY,
+        totalDist: Math.hypot(targetX - gunX, targetY - gunY),
         vx: targetX,
         vy: targetY,
         type: 'laser_beam',
@@ -579,6 +663,11 @@ const {
       projectiles.push({
         x: gunX,
         y: gunY,
+        startX: gunX,
+        startY: gunY,
+        targetX: hitX,
+        targetY: hitY,
+        totalDist: Math.hypot(hitX - gunX, hitY - gunY),
         vx: (hitX - gunX) / 2,
         vy: (hitY - gunY) / 2,
         type: 'tracer',
@@ -596,6 +685,11 @@ const {
       projectiles.push({
         x: targetX,
         y: targetY,
+        startX: targetX,
+        startY: targetY,
+        targetX: targetX,
+        targetY: targetY,
+        totalDist: 0,
         vx: (Math.random() - 0.5) * 4,
         vy: -Math.random() * 4 - 2,
         type: 'star',
@@ -604,18 +698,23 @@ const {
         color: '#00F0FF',
       });
     } else if (currentWeapon === 'rocket') {
-      if (now - lastShotTime < 450) return;
+      if (now - lastShotTime < 400) return;
       lastShotTime = now;
       sfx.playExplosion();
 
-      // Rocket missile flies from gun to cursor
+      // Precision Rocket ballistic flight directly to (targetX, targetY)
       const dist = Math.hypot(targetX - gunX, targetY - gunY);
-      const speed = 14;
+      const speed = 18;
       projectiles.push({
         x: gunX,
         y: gunY,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
+        startX: gunX,
+        startY: gunY,
+        targetX: targetX,
+        targetY: targetY,
+        totalDist: Math.max(1, dist),
+        vx: dist > 0 ? ((targetX - gunX) / dist) * speed : 0,
+        vy: dist > 0 ? ((targetY - gunY) / dist) * speed : 0,
         type: 'rocket',
         radius: 8,
         life: 0,
@@ -625,13 +724,17 @@ const {
       if (now - lastShotTime < 2000) return;
       lastShotTime = now;
       sfx.playNuke();
-      for (let i = 0; i < 10; i++) {
+
+      // Direct nuke epicenter right on mouse click
+      punchBlastHole(targetX, targetY, 140, 'huge');
+
+      for (let i = 0; i < 8; i++) {
         setTimeout(() => {
           if (!pageCanvas) return;
-          const rx = Math.random() * pageCanvas.width;
-          const ry = Math.random() * pageCanvas.height;
-          punchBlastHole(rx, ry, 180, 'huge');
-        }, i * 50);
+          const rx = targetX + (Math.random() - 0.5) * 350;
+          const ry = targetY + (Math.random() - 0.5) * 250;
+          punchBlastHole(rx, ry, 120, 'huge');
+        }, i * 60);
       }
     }
   }
@@ -642,12 +745,24 @@ const {
     const gunY = player.y - 12;
     const targetX = mouseX;
     const targetY = mouseY;
-    const angle = Math.atan2(targetY - gunY, targetX - gunX);
+    const dist = Math.hypot(targetX - gunX, targetY - gunY);
+    const timeFrames = Math.max(20, Math.min(50, dist / 12));
+    const gravity = 0.4;
+    
+    // Precise parabolic toss to land on targetX, targetY
+    const vx = (targetX - gunX) / timeFrames;
+    const vy = (targetY - gunY - 0.5 * gravity * timeFrames * timeFrames) / timeFrames;
+
     projectiles.push({
       x: gunX,
       y: gunY,
-      vx: Math.cos(angle) * 12,
-      vy: Math.sin(angle) * 12 - 5,
+      startX: gunX,
+      startY: gunY,
+      targetX: targetX,
+      targetY: targetY,
+      totalDist: dist,
+      vx: vx,
+      vy: vy,
       type: 'grenade',
       radius: 7,
       life: 0,
@@ -819,29 +934,71 @@ const {
           fxCtx.font = '16px serif';
           fxCtx.fillText('🍓', p.x - 8, p.y + 6);
 
-          if (p.life > 70) {
+          const distToTarget = Math.hypot(p.x - p.targetX, p.y - p.targetY);
+          if (distToTarget < 20 || p.life > 45) {
             sfx.playExplosion();
-            punchBlastHole(p.x, p.y, 75);
+            punchBlastHole(p.targetX, p.targetY, 75, 'huge');
             projectiles.splice(i, 1);
             continue;
           }
         } else if (p.type === 'rocket') {
-          fxCtx.fillStyle = '#FF0055';
-          fxCtx.beginPath();
-          fxCtx.arc(p.x, p.y, 6, 0, Math.PI * 2);
-          fxCtx.fill();
+          // Draw Rocket Body & Jet Flame
+          fxCtx.save();
+          const angle = Math.atan2(p.vy, p.vx);
+          fxCtx.translate(p.x, p.y);
+          fxCtx.rotate(angle);
 
-          if (p.life > 25 || p.x < 0 || p.x > fxCanvas.width || p.y < 0 || p.y > fxCanvas.height) {
+          // Rocket Body
+          fxCtx.fillStyle = '#FF0055';
+          fxCtx.fillRect(-10, -4, 16, 8);
+          // Rocket Nosecone
+          fxCtx.fillStyle = '#FFEA00';
+          fxCtx.beginPath();
+          fxCtx.moveTo(6, -4);
+          fxCtx.lineTo(14, 0);
+          fxCtx.lineTo(6, 4);
+          fxCtx.closePath();
+          fxCtx.fill();
+          // Rocket Wings
+          fxCtx.fillStyle = '#00F0FF';
+          fxCtx.fillRect(-10, -7, 4, 14);
+
+          // Animated Thruster Flame
+          fxCtx.fillStyle = Math.random() > 0.5 ? '#FF9900' : '#FFEA00';
+          fxCtx.fillRect(-16, -3, 6, 6);
+          fxCtx.restore();
+
+          // Spawn smoke particles behind rocket
+          if (Math.random() > 0.3) {
+            paperShards.push({
+              x: p.x - p.vx * 0.4,
+              y: p.y - p.vy * 0.4,
+              vx: (Math.random() - 0.5) * 1.5,
+              vy: (Math.random() - 0.5) * 1.5,
+              rot: Math.random() * Math.PI,
+              vRot: 0.1,
+              size: Math.random() * 4 + 2,
+              color: 'rgba(255, 120, 120, 0.7)',
+              life: 0,
+              maxLife: 15,
+            });
+          }
+
+          const distTraveled = Math.hypot(p.x - p.startX, p.y - p.startY);
+          const distToTarget = Math.hypot(p.x - p.targetX, p.y - p.targetY);
+
+          // Explode PRECISELY on mouse target coordinates
+          if (distTraveled >= p.totalDist || distToTarget <= 20 || p.life > 50 || p.x < 0 || p.x > fxCanvas.width || p.y < 0 || p.y > fxCanvas.height) {
             sfx.playExplosion();
-            punchBlastHole(p.x, p.y, 65);
+            punchBlastHole(p.targetX, p.targetY, 70, 'huge');
             projectiles.splice(i, 1);
             continue;
           }
         } else if (p.type === 'star') {
           fxCtx.font = '14px serif';
           fxCtx.fillText('⭐', p.x - 6, p.y + 5);
-          if (p.life > 20) {
-            punchBlastHole(p.x, p.y, 35);
+          if (p.life > 15) {
+            punchBlastHole(p.targetX, p.targetY, 35, 'star');
             projectiles.splice(i, 1);
             continue;
           }
@@ -851,8 +1008,8 @@ const {
           fxCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
           fxCtx.fill();
 
-          if (p.life > 18) {
-            punchBlastHole(p.x, p.y, 22);
+          if (p.life > 10) {
+            punchBlastHole(p.targetX, p.targetY, 14, 'jagged');
             projectiles.splice(i, 1);
             continue;
           }
@@ -956,10 +1113,7 @@ const {
 
   document.getElementById('btn-modal-destroy')?.addEventListener('click', () => {
     const inputVal = modalInput?.value?.trim() || 'wikipedia.org';
-    const cleanDomain = inputVal.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '').split('/')[0];
-    currentDomain = cleanDomain;
-    currentTheme = cleanDomain.includes('google') ? 'google' : cleanDomain.includes('wiki') ? 'wiki' : 'custom';
-    renderWebpageTemplate(currentDomain, currentTheme);
+    loadLiveWebsiteScreenshot(inputVal);
     modal?.classList.add('hidden');
     modal?.classList.remove('flex');
   });
@@ -967,11 +1121,8 @@ const {
   document.querySelectorAll('.btn-quick-try').forEach((chip) => {
     chip.addEventListener('click', () => {
       const url = chip.getAttribute('data-url') || 'wikipedia.org';
-      const theme = chip.getAttribute('data-theme') || 'wiki';
-      currentDomain = url;
-      currentTheme = theme;
       if (modalInput) modalInput.value = url;
-      renderWebpageTemplate(currentDomain, currentTheme);
+      loadLiveWebsiteScreenshot(url);
       modal?.classList.add('hidden');
       modal?.classList.remove('flex');
     });
@@ -983,7 +1134,7 @@ const {
   });
 
   document.getElementById('btn-repair')?.addEventListener('click', () => {
-    renderWebpageTemplate(currentDomain, currentTheme);
+    renderActiveCanvas();
   });
 
   document.getElementById('btn-sound')?.addEventListener('click', () => {
@@ -992,6 +1143,8 @@ const {
     if (btn) btn.textContent = isMuted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
   });
 
+  // Initial load
   resizeCanvases();
+  loadLiveWebsiteScreenshot('wikipedia.org');
   gameLoop();
 </script>
