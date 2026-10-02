@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const pageTitle = '404 - Arena Zone Not Found | Destroy Website';
+const pageDescription = 'This webpage was already destroyed or does not exist. Return to the destruction arena.';
+---
+
+<Layout title={pageTitle} description={pageDescription} noindex={true}>
+  <div class="max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
+    <div class="w-24 h-24 mx-auto rounded-3xl bg-arcade-card border-2 border-neon-pink/50 flex items-center justify-center text-5xl shadow-[0_0_30px_rgba(255,42,109,0.3)] animate-pulse">
+      💥
+    </div>
+
+    <div class="space-y-2">
+      <span class="text-xs font-mono text-neon-pink uppercase tracking-widest font-bold">Error 404 · Obliterated</span>
+      <h1 class="text-4xl sm:text-5xl font-black text-white">This Page Was Demolished</h1>
+      <p class="text-sm text-destruct-muted">
+        Looks like someone fired a tactical nuke here. Head back to the main sandbox to select a new target!
+      </p>
+    </div>
+
+    <div class="pt-4">
+      <a
+        href="/"
+        class="inline-block px-6 py-3 bg-neon-pink hover:bg-neon-pink/80 text-white font-black text-xs sm:text-sm rounded-xl shadow-[0_0_20px_rgba(255,42,109,0.5)] transition-all font-mono uppercase"
+      >
+        🔄 Return to Destruction Sandbox
+      </a>
+    </div>
+  </div>
+</Layout>

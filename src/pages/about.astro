@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const pageTitle = 'About Destroy Website: Mission, Safety & Open Sandbox';
+const pageDescription = 'Learn more about Destroy Website, our mission to build safe and fun browser entertainment tools, and our ethical sandbox commitments.';
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+    <nav class="flex items-center gap-2 text-xs font-mono text-destruct-dim">
+      <a href="/" class="hover:text-neon-cyan">Home</a>
+      <span>/</span>
+      <span class="text-white">About</span>
+    </nav>
+
+    <div class="text-center space-y-3">
+      <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+        About <span class="text-neon-pink">Destroy Website</span>
+      </h1>
+      <p class="text-sm text-destruct-muted">
+        Building fast, harmless, and joyful web toys for millions of internet users.
+      </p>
+    </div>
+
+    <div class="bg-arcade-card border border-arcade-border rounded-3xl p-6 sm:p-10 space-y-6 text-sm text-destruct-muted leading-relaxed">
+      <section class="space-y-2">
+        <h2 class="text-lg font-bold text-white">Our Mission</h2>
+        <p>
+          The internet can sometimes feel overwhelming — filled with paywalls, slow loading speeds, and stressful portals. <strong>Destroy Website</strong> exists as a harmless pressure valve: an interactive physics sandbox where anyone can blow off steam by smashing simulated webpages with playful weapons.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-lg font-bold text-white">Safety & Ethical Architecture</h2>
+        <p>
+          We take online safety and security seriously. Destroy Website is strictly an in-browser sandbox simulation. It has no capabilities to attack, probe, or affect real-world servers or websites. All physics computations happen locally on your computer or phone.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-lg font-bold text-white">Contact & Feedback</h2>
+        <p>
+          Have a weapon idea, a bug report, or want to suggest a new target preset? Reach out to our engineering team at <a href="mailto:support@destroywebsite.com" class="text-neon-cyan font-bold underline">support@destroywebsite.com</a>.
+        </p>
+      </section>
+    </div>
+  </div>
+</Layout>

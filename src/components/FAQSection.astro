@@ -1,0 +1,40 @@
+---
+import { FAQS } from '../data/faqs';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const {
+  title = 'Frequently Asked Questions',
+  subtitle = 'Everything you need to know about the browser web demolition sandbox and security.',
+} = Astro.props;
+---
+
+<section class="space-y-6">
+  <div class="text-center space-y-2">
+    <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+      {title}
+    </h2>
+    <p class="text-xs sm:text-sm text-destruct-muted max-w-lg mx-auto">
+      {subtitle}
+    </p>
+  </div>
+
+  <div class="space-y-3 max-w-3xl mx-auto">
+    {FAQS.map((faq) => (
+      <details class="group bg-arcade-card border border-arcade-border rounded-2xl p-4 sm:p-5 transition-all [&_summary::-webkit-details-marker]:hidden">
+        <summary class="flex items-center justify-between cursor-pointer font-bold text-white text-sm sm:text-base group-hover:text-neon-cyan transition-colors select-none">
+          <span>{faq.q}</span>
+          <span class="text-neon-pink font-mono text-lg transition-transform group-open:rotate-45 ml-2 shrink-0">
+            +
+          </span>
+        </summary>
+        <div class="mt-3 pt-3 border-t border-arcade-border/60 text-xs sm:text-sm text-destruct-muted leading-relaxed">
+          {faq.a}
+        </div>
+      </details>
+    ))}
+  </div>
+</section>

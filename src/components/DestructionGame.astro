@@ -1,0 +1,533 @@
+---
+import { WEAPONS } from '../data/weapons';
+import { TARGET_SITES } from '../data/targets';
+
+interface Props {
+  initialTargetSlug?: string;
+}
+
+const { initialTargetSlug = 'google' } = Astro.props;
+---
+
+<div id="game-viewport" class="w-full bg-arcade-card border-2 border-neon-pink/40 rounded-3xl p-4 sm:p-6 shadow-[0_0_35px_rgba(255,42,109,0.2)] space-y-4">
+  <!-- Top Bar: URL Input + Controls -->
+  <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+    <!-- URL Input -->
+    <div class="flex-1 flex items-center gap-2 bg-arcade-darkest border border-arcade-border rounded-xl p-1.5 focus-within:border-neon-cyan transition-colors">
+      <span class="text-neon-cyan pl-2 text-sm">🌐</span>
+      <input
+        type="text"
+        id="target-url-input"
+        placeholder="Type any website (e.g., google.com, wikipedia.org, school.edu)..."
+        class="w-full bg-transparent text-white text-xs sm:text-sm placeholder:text-destruct-dim focus:outline-none font-mono"
+        value="https://google.com"
+      />
+      <button
+        id="btn-load-target"
+        class="px-4 py-2 bg-neon-cyan/20 hover:bg-neon-cyan text-neon-cyan hover:text-arcade-darkest font-bold text-xs rounded-lg transition-all border border-neon-cyan/40 whitespace-nowrap"
+      >
+        Load Target
+      </button>
+    </div>
+
+    <!-- Quick Target Dropdown / Buttons -->
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+      <span class="text-[11px] font-mono text-destruct-dim whitespace-nowrap">Presets:</span>
+      {TARGET_SITES.map((t) => (
+        <button
+          class="btn-preset-chip px-2.5 py-1 bg-arcade-darkest hover:bg-arcade-hover border border-arcade-border hover:border-neon-pink text-destruct-muted hover:text-white text-xs rounded-lg font-mono transition-all whitespace-nowrap"
+          data-slug={t.slug}
+          data-url={t.url}
+        >
+          {t.name.split(' ')[0]}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- Weapon Armory Selector Ribbon -->
+  <div class="bg-arcade-darkest/80 border border-arcade-border rounded-2xl p-2.5">
+    <div class="flex items-center justify-between gap-2 overflow-x-auto pb-1 sm:pb-0">
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        {WEAPONS.map((w, idx) => (
+          <button
+            class={`weapon-select-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              idx === 0
+                ? 'bg-neon-pink/20 border-neon-pink text-white shadow-[0_0_12px_rgba(255,42,109,0.5)]'
+                : 'bg-arcade-card/50 border-arcade-border text-destruct-muted hover:text-white hover:border-neon-pink/50'
+            }`}
+            data-weapon-id={w.id}
+            data-color={w.color}
+            data-dps={w.dps}
+            title={`${w.name} - ${w.tagline} (Key: ${idx + 1})`}
+          >
+            <span class="text-base">{w.icon}</span>
+            <span class="hidden lg:inline">{w.name}</span>
+            <span class="text-[10px] font-mono opacity-50 px-1 py-0.5 bg-arcade-darkest rounded">
+              {idx + 1}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Sound & Reset Controls -->
+      <div class="flex items-center gap-2 border-l border-arcade-border pl-2">
+        <button
+          id="btn-sound-toggle"
+          class="p-2 bg-arcade-card hover:bg-arcade-hover border border-arcade-border rounded-lg text-destruct-muted hover:text-white text-xs font-mono"
+          title="Toggle Sound Effects"
+        >
+          🔊 SFX: ON
+        </button>
+        <button
+          id="btn-reset-stage"
+          class="px-3 py-1.5 bg-arcade-card hover:bg-arcade-hover border border-arcade-border rounded-lg text-destruct-muted hover:text-neon-yellow text-xs font-bold font-mono transition-colors"
+        >
+          🔄 Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Sandbox Arena (Canvas & Physics Viewport) -->
+  <div class="relative w-full h-[480px] sm:h-[540px] bg-arcade-darkest rounded-2xl overflow-hidden border-2 border-arcade-border shadow-inner group select-none">
+    <!-- Webpage Simulation Stage (Elements DOM Container) -->
+    <div id="sim-stage" class="absolute inset-0 p-6 flex flex-col justify-start gap-3 overflow-hidden pointer-events-auto transition-all">
+      <!-- Generated Webpage Blocks Will Appear Here -->
+    </div>
+
+    <!-- Particle & Canvas Overlay -->
+    <canvas id="physics-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
+
+    <!-- Crosshair Cursor Follower -->
+    <div id="custom-crosshair" class="pointer-events-none absolute w-8 h-8 rounded-full border border-neon-pink/80 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 z-20 transition-opacity opacity-0 group-hover:opacity-100">
+      <div class="w-1.5 h-1.5 bg-neon-cyan rounded-full"></div>
+    </div>
+
+    <!-- HUD Overlay Status -->
+    <div class="absolute top-3 left-3 z-30 flex items-center gap-2">
+      <!-- Destruction Meter -->
+      <div class="px-3 py-1.5 bg-arcade-darkest/90 border border-neon-pink/50 rounded-xl backdrop-blur-md shadow-lg flex items-center gap-2">
+        <span class="text-xs font-bold text-destruct-muted">DESTRUCTION:</span>
+        <div class="w-24 sm:w-32 h-3 bg-arcade-border rounded-full overflow-hidden p-0.5">
+          <div id="destruction-progress-bar" class="h-full bg-gradient-to-r from-neon-yellow via-neon-pink to-neon-red rounded-full transition-all duration-200" style="width: 0%"></div>
+        </div>
+        <span id="destruction-percentage" class="text-xs font-black font-mono text-neon-pink">0%</span>
+      </div>
+
+      <!-- Combo Badge -->
+      <div id="combo-badge" class="px-3 py-1.5 bg-arcade-darkest/90 border border-neon-yellow/50 rounded-xl backdrop-blur-md text-neon-yellow font-black text-xs font-mono hidden animate-bounce">
+        🔥 <span id="combo-count">0</span>x COMBO!
+      </div>
+    </div>
+
+    <!-- Tactical Nuke Whiteout Layer -->
+    <div id="nuke-flash" class="absolute inset-0 bg-white pointer-events-none opacity-0 z-40 transition-opacity duration-700"></div>
+
+    <!-- Victory Screen when 100% Destroyed -->
+    <div id="victory-modal" class="absolute inset-0 bg-arcade-darkest/90 backdrop-blur-md z-30 flex flex-col items-center justify-center space-y-4 p-6 text-center opacity-0 pointer-events-none transition-opacity duration-500">
+      <span class="text-5xl animate-bounce">🏆💥</span>
+      <h3 class="text-3xl font-black text-white tracking-tight">
+        100% TOTAL <span class="text-neon-pink">OBLITERATION!</span>
+      </h3>
+      <p class="text-sm text-destruct-muted max-w-md">
+        You completely annihilated every single DOM element, container, and pixel on this webpage!
+      </p>
+      <div class="flex items-center gap-3 pt-2">
+        <button id="btn-replay" class="px-5 py-2.5 bg-neon-pink hover:bg-neon-pink/80 text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(255,42,109,0.5)] transition-all">
+          🔄 Destroy Again
+        </button>
+        <button id="btn-next-target" class="px-5 py-2.5 bg-neon-cyan hover:bg-neon-cyan/80 text-arcade-darkest font-black text-xs rounded-xl shadow-[0_0_20px_rgba(5,217,232,0.5)] transition-all">
+          🎯 Next Target Site ↗
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Tip -->
+  <div class="flex flex-col sm:flex-row items-center justify-between text-[11px] text-destruct-dim font-mono gap-2 pt-1">
+    <span>💡 <strong>Pro Tip:</strong> Press numbers <kbd class="px-1.5 py-0.5 bg-arcade-darkest border border-arcade-border rounded text-neon-cyan">1</kbd> through <kbd class="px-1.5 py-0.5 bg-arcade-darkest border border-arcade-border rounded text-neon-cyan">7</kbd> on your keyboard to instantly switch weapons!</span>
+    <span class="text-destruct-muted">Safe sandbox mode · Client-side visual only</span>
+  </div>
+</div>
+
+<script>
+  import { TARGET_SITES } from '../data/targets';
+  import { sfx } from '../lib/sound';
+
+  // Game State
+  let currentWeapon = 'hammer';
+  let totalNodes = 0;
+  let destroyedNodes = 0;
+  let combo = 0;
+  let comboTimer: any = null;
+  let currentTargetSlug = 'google';
+
+  const stage = document.getElementById('sim-stage');
+  const canvas = document.getElementById('physics-canvas') as HTMLCanvasElement;
+  const ctx = canvas?.getContext('2d');
+  const crosshair = document.getElementById('custom-crosshair');
+  const progressBar = document.getElementById('destruction-progress-bar');
+  const progressText = document.getElementById('destruction-percentage');
+  const comboBadge = document.getElementById('combo-badge');
+  const comboCount = document.getElementById('combo-count');
+  const victoryModal = document.getElementById('victory-modal');
+  const nukeFlash = document.getElementById('nuke-flash');
+  const soundBtn = document.getElementById('btn-sound-toggle');
+  const urlInput = document.getElementById('target-url-input') as HTMLInputElement;
+
+  // Particles System
+  interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    color: string;
+    life: number;
+    maxLife: number;
+  }
+  const particles: Particle[] = [];
+
+  function resizeCanvas() {
+    if (!canvas) return;
+    canvas.width = canvas.parentElement?.clientWidth || 800;
+    canvas.height = canvas.parentElement?.clientHeight || 500;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // Load Target Template
+  function loadTarget(slug: string) {
+    currentTargetSlug = slug;
+    const target = TARGET_SITES.find((t) => t.slug === slug) || TARGET_SITES[0];
+    if (urlInput) urlInput.value = target.url;
+
+    if (!stage) return;
+    stage.innerHTML = '';
+    destroyedNodes = 0;
+    combo = 0;
+    updateProgress();
+
+    if (victoryModal) {
+      victoryModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    target.mockElements.forEach((el, index) => {
+      const block = document.createElement('div');
+      block.className = 'destructible-block cursor-crosshair transition-transform select-none rounded-xl p-3 flex items-center justify-between border border-white/10 shadow-md';
+      block.style.width = `${el.width}%`;
+      block.style.minHeight = `${el.height}px`;
+      block.style.backgroundColor = el.bg;
+      block.style.color = el.text;
+      block.setAttribute('data-health', '100');
+      block.setAttribute('data-id', `block-${index}`);
+
+      block.innerHTML = `
+        <span class="font-bold text-xs sm:text-sm truncate pointer-events-none">${el.label}</span>
+        <span class="text-[10px] font-mono opacity-40 px-1.5 py-0.5 bg-black/40 rounded pointer-events-none">&lt;${el.type}&gt;</span>
+      `;
+
+      stage.appendChild(block);
+    });
+
+    totalNodes = target.mockElements.length;
+    attachBlockListeners();
+  }
+
+  // Load Custom URL simulation
+  function loadCustomUrl(rawUrl: string) {
+    let clean = rawUrl.trim();
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+      clean = 'https://' + clean;
+    }
+    const domain = clean.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '').split('/')[0];
+
+    if (!stage) return;
+    stage.innerHTML = '';
+    destroyedNodes = 0;
+    combo = 0;
+    updateProgress();
+
+    const customBlocks = [
+      { label: `${domain} - Navigation Header`, type: 'header', height: 45, bg: '#1E293B', text: '#38BDF8', width: 95 },
+      { label: `Main Hero: Welcome to ${domain}`, type: 'hero', height: 85, bg: '#0F172A', text: '#F8FAFC', width: 95 },
+      { label: `Feature 01: Core Cloud Infrastructure & Analytics`, type: 'card', height: 60, bg: '#1E293B', text: '#CBD5E1', width: 90 },
+      { label: `Feature 02: Real-time Customer Engagement Engine`, type: 'card', height: 60, bg: '#1E293B', text: '#CBD5E1', width: 90 },
+      { label: `[Sign Up Free] [Schedule Demo Now]`, type: 'button', height: 40, bg: '#05D9E8', text: '#050510', width: 70 },
+      { label: `Footer: Privacy · Terms · Copyright 2026 ${domain}`, type: 'footer', height: 40, bg: '#0B0F19', text: '#64748B', width: 95 },
+    ];
+
+    customBlocks.forEach((el, index) => {
+      const block = document.createElement('div');
+      block.className = 'destructible-block cursor-crosshair transition-transform select-none rounded-xl p-3 flex items-center justify-between border border-white/10 shadow-md';
+      block.style.width = `${el.width}%`;
+      block.style.minHeight = `${el.height}px`;
+      block.style.backgroundColor = el.bg;
+      block.style.color = el.text;
+      block.setAttribute('data-health', '100');
+      block.setAttribute('data-id', `custom-block-${index}`);
+
+      block.innerHTML = `
+        <span class="font-bold text-xs sm:text-sm truncate pointer-events-none">${el.label}</span>
+        <span class="text-[10px] font-mono opacity-40 px-1.5 py-0.5 bg-black/40 rounded pointer-events-none">&lt;${el.type}&gt;</span>
+      `;
+
+      stage.appendChild(block);
+    });
+
+    totalNodes = customBlocks.length;
+    attachBlockListeners();
+  }
+
+  function spawnParticles(x: number, y: number, color: string, count: number = 15) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 8 + 2;
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: Math.random() * 5 + 2,
+        color: color,
+        life: 0,
+        maxLife: Math.random() * 30 + 20,
+      });
+    }
+  }
+
+  function triggerScreenShake() {
+    const arena = document.getElementById('sim-stage');
+    if (arena) {
+      arena.classList.add('animate-shake');
+      setTimeout(() => arena.classList.remove('animate-shake'), 400);
+    }
+  }
+
+  function updateProgress() {
+    const pct = totalNodes > 0 ? Math.min(100, Math.round((destroyedNodes / totalNodes) * 100)) : 0;
+    if (progressBar) progressBar.style.width = `${pct}%`;
+    if (progressText) progressText.textContent = `${pct}%`;
+
+    if (pct >= 100 && victoryModal) {
+      victoryModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+  }
+
+  function registerHit(targetBlock: HTMLElement, clientX: number, clientY: number) {
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    // Combo counter
+    combo++;
+    if (comboBadge && comboCount) {
+      comboCount.textContent = `${combo}`;
+      comboBadge.classList.remove('hidden');
+      clearTimeout(comboTimer);
+      comboTimer = setTimeout(() => {
+        combo = 0;
+        comboBadge.classList.add('hidden');
+      }, 1500);
+    }
+
+    if (currentWeapon === 'hammer') {
+      sfx.playHammer();
+      spawnParticles(x, y, '#FFEA00', 16);
+      destroyBlock(targetBlock, 'shatter');
+    } else if (currentWeapon === 'laser') {
+      sfx.playLaser();
+      spawnParticles(x, y, '#05D9E8', 25);
+      destroyBlock(targetBlock, 'burn');
+    } else if (currentWeapon === 'rocket') {
+      sfx.playExplosion();
+      triggerScreenShake();
+      spawnParticles(x, y, '#FF2A6D', 40);
+      destroyBlock(targetBlock, 'explode');
+    } else if (currentWeapon === 'gatling') {
+      sfx.playLaser();
+      spawnParticles(x, y, '#FF4365', 12);
+      destroyBlock(targetBlock, 'shatter');
+    } else if (currentWeapon === 'flamethrower') {
+      sfx.playLaser();
+      spawnParticles(x, y, '#FF8800', 30);
+      destroyBlock(targetBlock, 'burn');
+    } else if (currentWeapon === 'blackhole') {
+      sfx.playExplosion();
+      spawnParticles(x, y, '#A000FF', 50);
+      destroyBlock(targetBlock, 'vortex');
+    } else if (currentWeapon === 'nuke') {
+      triggerNuke();
+    } else {
+      sfx.playHammer();
+      spawnParticles(x, y, '#FFEA00', 15);
+      destroyBlock(targetBlock, 'shatter');
+    }
+  }
+
+  function destroyBlock(block: HTMLElement, mode: string) {
+    if (block.classList.contains('destroyed')) return;
+    block.classList.add('destroyed');
+    destroyedNodes++;
+    updateProgress();
+
+    block.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    if (mode === 'shatter') {
+      block.style.transform = `scale(0) rotate(${(Math.random() - 0.5) * 60}deg)`;
+      block.style.opacity = '0';
+    } else if (mode === 'burn') {
+      block.style.backgroundColor = '#000000';
+      block.style.transform = 'scale(0.8)';
+      block.style.opacity = '0';
+    } else if (mode === 'explode') {
+      block.style.transform = `translateY(${(Math.random() - 0.5) * 300}px) scale(0)`;
+      block.style.opacity = '0';
+    } else if (mode === 'vortex') {
+      block.style.transform = 'scale(0) rotate(720deg)';
+      block.style.opacity = '0';
+    }
+    block.style.pointerEvents = 'none';
+  }
+
+  function triggerNuke() {
+    sfx.playNuke();
+    triggerScreenShake();
+    if (nukeFlash) {
+      nukeFlash.classList.remove('opacity-0');
+      setTimeout(() => nukeFlash.classList.add('opacity-0'), 500);
+    }
+    const allBlocks = stage?.querySelectorAll('.destructible-block');
+    allBlocks?.forEach((b) => {
+      destroyBlock(b as HTMLElement, 'explode');
+    });
+  }
+
+  function attachBlockListeners() {
+    const blocks = stage?.querySelectorAll('.destructible-block');
+    blocks?.forEach((b) => {
+      b.addEventListener('mousedown', (e: any) => {
+        registerHit(b as HTMLElement, e.clientX, e.clientY);
+      });
+      b.addEventListener('touchstart', (e: any) => {
+        const touch = e.touches[0];
+        registerHit(b as HTMLElement, touch.clientX, touch.clientY);
+      }, { passive: true });
+    });
+  }
+
+  // Animation Loop for Particles
+  function animate() {
+    if (ctx && canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15; // gravity
+        p.life++;
+
+        const alpha = 1 - p.life / p.maxLife;
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.life >= p.maxLife) {
+          particles.splice(i, 1);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Weapon Selector Buttons
+  const weaponBtns = document.querySelectorAll('.weapon-select-btn');
+  weaponBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      weaponBtns.forEach((b) => {
+        b.classList.remove('bg-neon-pink/20', 'border-neon-pink', 'text-white', 'shadow-[0_0_12px_rgba(255,42,109,0.5)]');
+        b.classList.add('bg-arcade-card/50', 'border-arcade-border', 'text-destruct-muted');
+      });
+      btn.classList.remove('bg-arcade-card/50', 'border-arcade-border', 'text-destruct-muted');
+      btn.classList.add('bg-neon-pink/20', 'border-neon-pink', 'text-white', 'shadow-[0_0_12px_rgba(255,42,109,0.5)]');
+
+      currentWeapon = btn.getAttribute('data-weapon-id') || 'hammer';
+      if (currentWeapon === 'nuke') {
+        triggerNuke();
+      }
+    });
+  });
+
+  // Keyboard Shortcuts (1-7)
+  window.addEventListener('keydown', (e) => {
+    const keyMap: Record<string, string> = {
+      '1': 'hammer',
+      '2': 'laser',
+      '3': 'rocket',
+      '4': 'gatling',
+      '5': 'flamethrower',
+      '6': 'blackhole',
+      '7': 'nuke',
+    };
+    if (keyMap[e.key]) {
+      const targetBtn = document.querySelector(`[data-weapon-id="${keyMap[e.key]}"]`) as HTMLButtonElement;
+      if (targetBtn) targetBtn.click();
+    }
+  });
+
+  // Target Presets Click
+  document.querySelectorAll('.btn-preset-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const slug = btn.getAttribute('data-slug') || 'google';
+      loadTarget(slug);
+    });
+  });
+
+  // URL Load Button
+  document.getElementById('btn-load-target')?.addEventListener('click', () => {
+    if (urlInput && urlInput.value) {
+      loadCustomUrl(urlInput.value);
+    }
+  });
+
+  // Reset Stage Button
+  document.getElementById('btn-reset-stage')?.addEventListener('click', () => {
+    loadTarget(currentTargetSlug);
+  });
+
+  // Replay Modal Button
+  document.getElementById('btn-replay')?.addEventListener('click', () => {
+    loadTarget(currentTargetSlug);
+  });
+
+  // Next Target Modal Button
+  document.getElementById('btn-next-target')?.addEventListener('click', () => {
+    const slugs = TARGET_SITES.map((t) => t.slug);
+    const currIdx = slugs.indexOf(currentTargetSlug);
+    const nextSlug = slugs[(currIdx + 1) % slugs.length];
+    loadTarget(nextSlug);
+  });
+
+  // Sound Toggle Button
+  soundBtn?.addEventListener('click', () => {
+    const isMuted = sfx.toggleMute();
+    soundBtn.textContent = isMuted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
+  });
+
+  // Crosshair tracking
+  const viewport = document.getElementById('game-viewport');
+  viewport?.addEventListener('mousemove', (e) => {
+    if (crosshair && canvas) {
+      const rect = canvas.getBoundingClientRect();
+      crosshair.style.left = `${e.clientX - rect.left}px`;
+      crosshair.style.top = `${e.clientY - rect.top}px`;
+    }
+  });
+
+  // Initial Load
+  loadTarget(currentTargetSlug);
+</script>

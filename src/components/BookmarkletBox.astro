@@ -1,0 +1,70 @@
+---
+const bookmarkletHref = "javascript:(function(){var s=document.createElement('script');s.src='https://destroywebsite.com/bookmarklet.js';document.body.appendChild(s);})();";
+---
+
+<div class="bg-gradient-to-br from-arcade-card to-arcade-darkest border-2 border-neon-pink/40 rounded-3xl p-6 sm:p-8 space-y-6 shadow-[0_0_30px_rgba(255,42,109,0.15)]">
+  <div class="space-y-2">
+    <span class="px-3 py-1 bg-neon-pink/20 text-neon-pink border border-neon-pink/40 text-xs font-mono font-bold rounded-full uppercase tracking-wider">
+      ⚡ Universal Bookmarklet
+    </span>
+    <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+      Destroy Any Website from Your Bookmarks Bar
+    </h3>
+    <p class="text-xs sm:text-sm text-destruct-muted leading-relaxed">
+      Drag this magic button into your browser bookmarks bar. When you visit any live website, click the bookmark to instantly summon the floating demolition crosshairs!
+    </p>
+  </div>
+
+  <!-- Draggable Button Zone -->
+  <div class="p-6 bg-arcade-darkest/90 border-2 border-dashed border-neon-pink/60 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+    <div class="space-y-1">
+      <span class="text-xs text-neon-yellow font-mono font-bold block">
+        👉 Drag this button to your Bookmarks Bar:
+      </span>
+      <a
+        href={bookmarkletHref}
+        class="inline-block px-6 py-3 bg-gradient-to-r from-neon-pink to-neon-purple text-white font-black text-sm rounded-xl shadow-[0_0_20px_rgba(255,42,109,0.5)] cursor-grab active:cursor-grabbing hover:scale-105 transition-transform"
+        onclick="return false;"
+      >
+        💥 DESTROY WEBSITE
+      </a>
+    </div>
+
+    <div class="text-xs text-destruct-dim font-mono max-w-xs space-y-1">
+      <p>1. Show bookmarks bar (<kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">Ctrl+Shift+B</kbd> or <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">Cmd+Shift+B</kbd>)</p>
+      <p>2. Drag the button up</p>
+      <p>3. Click it on any page to smash!</p>
+    </div>
+  </div>
+
+  <!-- Embed Widget for Webmasters (Backlink Generator) -->
+  <div class="space-y-2 pt-4 border-t border-arcade-border">
+    <h4 class="font-bold text-white text-sm">
+      🌐 Webmaster Embed Code (Let your visitors destroy your site)
+    </h4>
+    <p class="text-xs text-destruct-dim">
+      Add this single line of HTML to your blog, portfolio, or site footer:
+    </p>
+    <div class="relative">
+      <pre class="bg-arcade-darkest p-3.5 rounded-xl border border-arcade-border text-xs text-neon-cyan font-mono overflow-x-auto"><code>&lt;a href="https://destroywebsite.com/bookmarklet/" onclick="javascript:(function()&#123;var s=document.createElement('script');s.src='https://destroywebsite.com/bookmarklet.js';document.body.appendChild(s);&#125;)();return false;"&gt;💥 Destroy This Page&lt;/a&gt;</code></pre>
+      <button
+        id="btn-copy-embed"
+        class="absolute top-2 right-2 px-2.5 py-1 bg-arcade-card hover:bg-neon-cyan hover:text-arcade-darkest text-destruct-muted text-xs font-mono rounded border border-arcade-border transition-colors"
+      >
+        Copy Code
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const copyBtn = document.getElementById('btn-copy-embed');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const code = `<a href="https://destroywebsite.com/bookmarklet/" onclick="javascript:(function(){var s=document.createElement('script');s.src='https://destroywebsite.com/bookmarklet.js';document.body.appendChild(s);})();return false;">💥 Destroy This Page</a>`;
+      navigator.clipboard.writeText(code);
+      copyBtn.textContent = '✅ Copied!';
+      setTimeout(() => (copyBtn.textContent = 'Copy Code'), 2000);
+    });
+  }
+</script>

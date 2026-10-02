@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://destroywebsite.com/sitemap.xml
+Sitemap: https://destroywebsite.com/sitemap-index.xml

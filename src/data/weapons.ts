@@ -1,0 +1,138 @@
+export interface Weapon {
+  id: string;
+  name: string;
+  icon: string;
+  tagline: string;
+  category: 'Melee' | 'Energy' | 'Explosive' | 'Superweapon' | 'Elemental';
+  dps: number;
+  radius: string;
+  rateOfFire: string;
+  recoil: string;
+  description: string;
+  secretUnlock: string;
+  color: string;
+  unlockedByDefault: boolean;
+}
+
+export const WEAPONS: Weapon[] = [
+  {
+    id: 'hammer',
+    name: 'Cyber Sledgehammer',
+    icon: '🔨',
+    tagline: 'Precision kinetic crushing power',
+    category: 'Melee',
+    dps: 150,
+    radius: '1.5m shockwave',
+    rateOfFire: 'Manual click',
+    recoil: 'None',
+    description: 'Smashes buttons, headers, and navigation bars into pulverized pixel dust upon direct contact. Creates shockwave ripples through adjacent DOM nodes.',
+    secretUnlock: 'Available by default',
+    color: '#FFEA00',
+    unlockedByDefault: true,
+  },
+  {
+    id: 'laser',
+    name: 'Plasma Laser Beam',
+    icon: '⚡',
+    tagline: 'Continuous cutting beam of hyper-ionized heat',
+    category: 'Energy',
+    dps: 450,
+    radius: 'Linear laser line',
+    rateOfFire: 'Continuous beam',
+    recoil: 'Zero',
+    description: 'Emits a piercing neon-cyan beam that burns through paragraphs, images, and tables. Leaves glowing purple ember scars across destroyed surfaces.',
+    secretUnlock: 'Available by default',
+    color: '#05D9E8',
+    unlockedByDefault: true,
+  },
+  {
+    id: 'rocket',
+    name: 'RPG-77 Rocket Launcher',
+    icon: '🚀',
+    tagline: 'High-explosive ballistic projectile',
+    category: 'Explosive',
+    dps: 850,
+    radius: '8.0m blast zone',
+    rateOfFire: '1.2 sec reload',
+    recoil: 'Heavy screen shake',
+    description: 'Fires a rocket that accelerates towards your crosshairs, triggering an orange-red fireball explosion that propels surrounding layout grids into space.',
+    secretUnlock: 'Available by default',
+    color: '#FF2A6D',
+    unlockedByDefault: true,
+  },
+  {
+    id: 'gatling',
+    name: 'Vulcan Gatling Cannon',
+    icon: '🔫',
+    tagline: 'Rapid-fire 3,000 RPM tungsten barrage',
+    category: 'Energy',
+    dps: 1200,
+    radius: 'Cone spread',
+    rateOfFire: 'Extreme (60 bullets/sec)',
+    recoil: 'Continuous vibration',
+    description: 'Hold down the trigger to unleash a devastating torrent of glowing micro-rounds that shred dense website sidebars and footer links in milliseconds.',
+    secretUnlock: 'Available by default',
+    color: '#FF4365',
+    unlockedByDefault: true,
+  },
+  {
+    id: 'flamethrower',
+    name: 'Dragonfire Flamethrower',
+    icon: '🔥',
+    tagline: 'Lingering thermal scorch zone',
+    category: 'Elemental',
+    dps: 650,
+    radius: 'Cone inferno',
+    rateOfFire: 'Stream',
+    recoil: 'Low',
+    description: 'Pours liquid fire over web components, causing secondary burning damage that slowly chars text and icons until they turn into black ash.',
+    secretUnlock: 'Deal 5,000 damage in a single session',
+    color: '#FF8800',
+    unlockedByDefault: true,
+  },
+  {
+    id: 'blackhole',
+    name: 'Singularity Vortex Generator',
+    icon: '🕳️',
+    tagline: 'Gravitational anomaly that consumes HTML nodes',
+    category: 'Superweapon',
+    dps: 2500,
+    radius: '15.0m event horizon',
+    rateOfFire: '5.0 sec charge',
+    recoil: 'Gravitational warp',
+    description: 'Deploys a miniature black hole that bends spacetime on the canvas, pulling all nearby DOM containers, ads, and cookies into an inescapable gravitational singularity.',
+    secretUnlock: 'Destroy 80% of any webpage',
+    color: '#A000FF',
+    unlockedByDefault: true,
+  },
+  {
+    id: 'nuke',
+    name: 'Tactical Quantum Nuke',
+    icon: '☢️',
+    tagline: 'Total thermonuclear wipeout (100% Damage)',
+    category: 'Superweapon',
+    dps: 99999,
+    radius: 'Fullscreen obliteration',
+    rateOfFire: 'One-shot doom',
+    recoil: 'Whiteout screen flash',
+    description: 'The ultimate weapon of mass destruction. Initiates an emergency siren countdown followed by a blinding flash that disintegrates 100% of the webpage in one blast.',
+    secretUnlock: 'Reach a 50x Combo or enter secret code "OBLITERATE"',
+    color: '#00F59B',
+    unlockedByDefault: true,
+  },
+  {
+    id: 'meteor',
+    name: 'Meteor Cataclysm',
+    icon: '☄️',
+    tagline: 'Rain burning asteroids from orbit',
+    category: 'Elemental',
+    dps: 3200,
+    radius: 'Multi-point barrage',
+    rateOfFire: '3.0 sec cooldown',
+    recoil: 'Earthquake tremor',
+    description: 'Calls down a cluster of celestial meteors that crash down from the stratosphere, creating deep craters in the webpage background grid.',
+    secretUnlock: 'Play on 3 different target presets',
+    color: '#FF5500',
+    unlockedByDefault: true,
+  },
+];

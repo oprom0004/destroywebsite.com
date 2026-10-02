@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const pageTitle = 'Terms of Service & Fair Use Disclaimer: Destroy Website';
+const pageDescription = 'Terms of service, intellectual property, and fair use disclaimer for Destroy Website.';
+---
+
+<Layout title={pageTitle} description={pageDescription} noindex={true}>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+    <nav class="flex items-center gap-2 text-xs font-mono text-destruct-dim">
+      <a href="/" class="hover:text-neon-cyan">Home</a>
+      <span>/</span>
+      <span class="text-white">Terms of Service</span>
+    </nav>
+
+    <div class="text-center space-y-2">
+      <h1 class="text-3xl font-black text-white">Terms of Service & Fair Use</h1>
+      <p class="text-xs font-mono text-destruct-dim">Last Updated: October 2026</p>
+    </div>
+
+    <div class="bg-arcade-card border border-arcade-border rounded-3xl p-6 sm:p-10 space-y-6 text-xs sm:text-sm text-destruct-muted leading-relaxed">
+      <section class="space-y-2">
+        <h2 class="text-base font-bold text-white">1. Entertainment & Simulation Only</h2>
+        <p>
+          Destroy Website is provided purely for entertainment, parody, and anti-stress amusement. It is a client-side visual simulation tool that does not perform any actual web hacking, DDoS attacks, or permanent modifications to external web servers.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-base font-bold text-white">2. Trademarks & Brand Names</h2>
+        <p>
+          All brand names, product logos, and third-party domain references (including Google, Wikipedia, Reddit, and others) belong exclusively to their respective owners. Their mention in preset mock simulations is purely for transformative parody and illustrative purposes under Fair Use doctrine.
+        </p>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-base font-bold text-white">3. Disclaimer of Warranty</h2>
+        <p>
+          The service is provided "AS IS" and "AS AVAILABLE" without warranties of any kind. Users agree to use the tool in compliance with applicable local laws and regulations.
+        </p>
+      </section>
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,55 @@
+---
+import type { TargetSite } from '../data/targets';
+
+interface Props {
+  target: TargetSite;
+}
+
+const { target } = Astro.props;
+
+const diffColorMap = {
+  Easy: 'text-neon-green border-neon-green/40 bg-neon-green/10',
+  Medium: 'text-neon-yellow border-neon-yellow/40 bg-neon-yellow/10',
+  Hard: 'text-neon-pink border-neon-pink/40 bg-neon-pink/10',
+  Extreme: 'text-neon-purple border-neon-purple/40 bg-neon-purple/10',
+};
+---
+
+<div class="bg-arcade-card hover:bg-arcade-hover border border-arcade-border hover:border-neon-cyan/60 rounded-2xl p-5 sm:p-6 transition-all group flex flex-col justify-between space-y-4 shadow-lg">
+  <!-- Top: Title & Category -->
+  <div class="space-y-1.5">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-mono text-destruct-dim uppercase tracking-wider">
+        {target.category}
+      </span>
+      <span class={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${diffColorMap[target.difficulty]}`}>
+        {target.difficulty}
+      </span>
+    </div>
+    <h3 class="text-base sm:text-lg font-black text-white group-hover:text-neon-cyan transition-colors">
+      {target.name}
+    </h3>
+    <span class="text-xs font-mono text-destruct-dim truncate block">
+      {target.url}
+    </span>
+  </div>
+
+  <!-- Description -->
+  <p class="text-xs text-destruct-muted leading-relaxed">
+    {target.description}
+  </p>
+
+  <!-- Action CTA -->
+  <div class="pt-3 border-t border-arcade-border/50 flex items-center justify-between">
+    <span class="text-[11px] font-mono text-destruct-dim">
+      🧱 {target.elementsCount} Destructible Blocks
+    </span>
+    <a
+      href={`/destroy/${target.slug}/`}
+      class="px-3.5 py-1.5 bg-neon-cyan/15 hover:bg-neon-cyan text-neon-cyan hover:text-arcade-darkest font-bold text-xs rounded-xl border border-neon-cyan/40 transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(5,217,232,0.2)]"
+    >
+      <span>Smash Now</span>
+      <span>💥</span>
+    </a>
+  </div>
+</div>

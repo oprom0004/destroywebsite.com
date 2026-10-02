@@ -1,0 +1,53 @@
+---
+interface Props {
+  question?: string;
+  directAnswer?: string;
+  bulletPoints?: string[];
+}
+
+const {
+  question = 'What is Destroy Website and is it safe to use?',
+  directAnswer = 'Destroy Website (destroywebsite.com) is an online anti-stress physics sandbox game that lets players interactively shatter, burn, and destroy simulated webpage layouts using 8 unique weapons (including sledgehammers, lasers, RPG rockets, and tactical nukes). It runs 100% locally in your browser via HTML5 Canvas and does not hack, modify, or harm real servers.',
+  bulletPoints = [
+    '100% Safe & Harmless: Operates solely on local client-side browser DOM clones.',
+    '8 Destructive Weapons: Lasers, rockets, singularity black holes, and full-screen nukes.',
+    'Instant Play: No software download, account registration, or browser extensions required.',
+    'Draggable Bookmarklet: Destroy any webpage directly from your bookmarks bar.',
+  ],
+} = Astro.props;
+---
+
+<div class="bg-gradient-to-r from-arcade-card via-arcade-card to-arcade-hover border-2 border-neon-cyan/40 rounded-2xl p-5 sm:p-7 shadow-[0_0_30px_rgba(5,217,232,0.15)] space-y-4">
+  <div class="flex items-center justify-between flex-wrap gap-2 border-b border-arcade-border pb-3">
+    <div class="flex items-center gap-2">
+      <span class="px-2.5 py-1 bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 text-[11px] font-black rounded-lg font-mono uppercase tracking-wider">
+        AI Quick Overview · Verified Safe
+      </span>
+    </div>
+    <span class="text-[11px] font-mono text-neon-green flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
+      Instant Sandbox Ready
+    </span>
+  </div>
+
+  <div class="space-y-2.5">
+    <h2 class="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
+      <span>💡</span>
+      <span>{question}</span>
+    </h2>
+    <p class="text-xs sm:text-sm text-destruct-text leading-relaxed">
+      {directAnswer}
+    </p>
+  </div>
+
+  {bulletPoints && bulletPoints.length > 0 && (
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-arcade-border/50">
+      {bulletPoints.map((point) => (
+        <div class="flex items-start gap-2 text-xs text-destruct-muted bg-arcade-darkest/60 p-2.5 rounded-xl border border-arcade-border">
+          <span class="text-neon-cyan font-bold">✓</span>
+          <span>{point}</span>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
