@@ -415,6 +415,12 @@ const {
       pageCtx.fillText('SUBMIT HOMEWORK NOW', 80, 348);
     }
 
+    // Spawn player standing on the top header platform
+    player.x = w / 2;
+    player.y = 105;
+    player.vx = 0;
+    player.vy = 0;
+
     destructionPercent = 0;
     updateHUD();
   }
@@ -595,55 +601,78 @@ const {
     });
   }
 
-  // Draw Kawaii Pixel Player Avatar
-  function drawPlayer(ctx: CanvasRenderingContext2D) {
+    // Enhanced Kawaii Pixel Hero Avatar (Vibrant Neon Orange & Rabbit Ears)
     ctx.save();
     ctx.translate(player.x, player.y);
     if (player.facing === -1) ctx.scale(-1, 1);
 
-    // Jetpack flame if flying
+    // Jetpack animated flames if hovering
     if (player.jetpack) {
-      ctx.fillStyle = Math.random() > 0.5 ? '#FFEA00' : '#FF0055';
-      ctx.fillRect(-12, 10, 6, Math.random() * 12 + 6);
+      ctx.fillStyle = '#00F0FF';
+      ctx.fillRect(-16, 12, 6, Math.random() * 16 + 8);
+      ctx.fillStyle = '#FFEA00';
+      ctx.fillRect(-14, 14, 4, Math.random() * 10 + 4);
     }
 
-    // Body (Kawaii Anime Hoodie / Visor)
-    ctx.fillStyle = '#FF4081'; // Pink hoodie
-    ctx.fillRect(-8, -12, 16, 18);
+    // Shadow on paper
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(0, 24, 14, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Jetpack backpack
+    // Body: Neon Orange Anime Outfit
+    ctx.fillStyle = '#FF6B00';
+    ctx.fillRect(-12, -14, 24, 24);
+    ctx.fillStyle = '#FF9E00';
+    ctx.fillRect(-8, -10, 16, 16);
+
+    // Jetpack Booster Backpack
+    ctx.fillStyle = '#25093E';
+    ctx.fillRect(-16, -10, 6, 18);
     ctx.fillStyle = '#00F0FF';
-    ctx.fillRect(-12, -8, 5, 12);
+    ctx.fillRect(-16, -6, 2, 8);
 
     // Head
-    ctx.fillStyle = '#FFE0BD'; // Face skin
-    ctx.fillRect(-7, -24, 14, 13);
+    ctx.fillStyle = '#FFE5D9'; // Soft skin
+    ctx.fillRect(-11, -32, 22, 20);
 
-    // Cute Ears
-    ctx.fillStyle = '#FF0055';
-    ctx.fillRect(-8, -29, 4, 6);
-    ctx.fillRect(4, -29, 4, 6);
+    // Long Kawaii Ears (Neon Orange & Pink inner)
+    ctx.fillStyle = '#FF6B00';
+    ctx.fillRect(-12, -44, 7, 14);
+    ctx.fillRect(5, -44, 7, 14);
+    ctx.fillStyle = '#FF4081';
+    ctx.fillRect(-10, -42, 3, 10);
+    ctx.fillRect(7, -42, 3, 10);
 
-    // Anime Eyes
+    // Big Anime Eyes
     ctx.fillStyle = '#1A0033';
-    ctx.fillRect(1, -20, 3, 5);
-    ctx.fillRect(-5, -20, 3, 5);
+    ctx.fillRect(2, -26, 4, 8);
+    ctx.fillRect(-7, -26, 4, 8);
+    // Eye sparkle
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(3, -25, 2, 3);
+    ctx.fillRect(-6, -25, 2, 3);
 
-    // Cute Blush
-    ctx.fillStyle = '#FF0077';
-    ctx.fillRect(3, -14, 3, 2);
-    ctx.fillRect(-7, -14, 3, 2);
+    // Cute Cheerful Blush
+    ctx.fillStyle = '#FF4081';
+    ctx.fillRect(4, -18, 4, 3);
+    ctx.fillRect(-9, -18, 4, 3);
 
-    // Legs
+    // Legs & Cute Shoes
     ctx.fillStyle = '#1A0033';
-    ctx.fillRect(-6, 6, 4, 8);
-    ctx.fillRect(2, 6, 4, 8);
+    ctx.fillRect(-8, 10, 6, 12);
+    ctx.fillRect(2, 10, 6, 12);
+    ctx.fillStyle = '#FF4081';
+    ctx.fillRect(-10, 18, 8, 5);
+    ctx.fillRect(2, 18, 8, 5);
 
-    // Pixel Gun in Hand
+    // Pixel Weapon in Hand
     ctx.fillStyle = '#334155';
-    ctx.fillRect(4, -6, 12, 5);
+    ctx.fillRect(6, -6, 16, 7);
+    ctx.fillStyle = '#FF4081';
+    ctx.fillRect(8, -8, 6, 3);
     ctx.fillStyle = '#FFEA00';
-    ctx.fillRect(14, -7, 4, 2);
+    ctx.fillRect(18, -8, 5, 4);
 
     ctx.restore();
   }
@@ -674,6 +703,21 @@ const {
 
       player.x += player.vx;
       player.y += player.vy;
+
+      // Platform Collisions (Stand on top of webpage header & article box)
+      const isDroppingDown = keys['KeyS'] || keys['ArrowDown'];
+      if (!isDroppingDown && player.vy >= 0) {
+        // Platform 1: Top Header (y = 105)
+        if (player.y >= 95 && player.y <= 112) {
+          player.y = 105;
+          player.vy = 0;
+        }
+        // Platform 2: Middle Article Box (y = 235)
+        else if (player.y >= 225 && player.y <= 242) {
+          player.y = 235;
+          player.vy = 0;
+        }
+      }
 
       // Arena bounds
       if (player.x < 30) player.x = 30;
