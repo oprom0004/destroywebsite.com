@@ -13,28 +13,28 @@ const {
 <div id="game-container" class="relative w-full rounded-3xl overflow-hidden border-2 border-[#ff659c]/50 shadow-[0_0_50px_rgba(255,101,156,0.3)] select-none bg-[#0284c7] aspect-[16/10] min-h-[580px] sm:min-h-[660px] group">
   
   <!-- LAYER 0: Kawaii Pixel Sky & Ocean Backdrop (Behind the Holes) -->
-  <div id="kawaii-sky-bg" class="absolute inset-x-0 -top-40 bottom-0 z-0 bg-gradient-to-b from-[#7dd3fc] via-[#38bdf8] to-[#0284c7] overflow-hidden pointer-events-none transition-transform duration-75">
+  <div id="kawaii-sky-bg" class="absolute inset-0 z-0 bg-gradient-to-b from-[#7dd3fc] via-[#38bdf8] to-[#0284c7] overflow-hidden pointer-events-none">
     <!-- Fluffy Pixel Clouds -->
-    <div class="absolute top-16 left-12 w-36 h-12 bg-white/85 rounded-full blur-[1px] shadow-[0_0_20px_rgba(255,255,255,0.6)]"></div>
-    <div class="absolute top-24 left-32 w-28 h-9 bg-white/95 rounded-full blur-[1px]"></div>
+    <div class="absolute top-12 left-12 w-36 h-12 bg-white/85 rounded-full blur-[1px] shadow-[0_0_20px_rgba(255,255,255,0.6)]"></div>
+    <div class="absolute top-20 left-32 w-28 h-9 bg-white/95 rounded-full blur-[1px]"></div>
     
-    <div class="absolute top-20 right-20 w-44 h-14 bg-white/80 rounded-full blur-[1px]"></div>
-    <div class="absolute top-12 right-40 w-32 h-10 bg-white/90 rounded-full blur-[1px]"></div>
+    <div class="absolute top-16 right-20 w-44 h-14 bg-white/80 rounded-full blur-[1px]"></div>
+    <div class="absolute top-8 right-40 w-32 h-10 bg-white/90 rounded-full blur-[1px]"></div>
 
-    <div class="absolute top-36 left-1/2 -translate-x-1/2 w-56 h-14 bg-white/65 rounded-full blur-[1px]"></div>
+    <div class="absolute top-28 left-1/2 -translate-x-1/2 w-56 h-14 bg-white/65 rounded-full blur-[1px]"></div>
 
     <!-- Distant Tropical Island Silhouette -->
-    <div class="absolute bottom-36 left-1/4 w-48 h-12 bg-[#0369a1]/40 rounded-t-full"></div>
-    <div class="absolute bottom-36 right-1/4 w-60 h-16 bg-[#0369a1]/30 rounded-t-full"></div>
+    <div class="absolute bottom-28 left-1/4 w-48 h-12 bg-[#0369a1]/40 rounded-t-full"></div>
+    <div class="absolute bottom-28 right-1/4 w-60 h-16 bg-[#0369a1]/30 rounded-t-full"></div>
 
     <!-- Pixel Ocean Waves -->
-    <div class="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#0369a1] to-[#0284c7] [background-size:24px_12px] [background-image:linear-gradient(to_right,rgba(255,255,255,0.25)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.15)_1px,transparent_1px)] opacity-85"></div>
+    <div class="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-[#0369a1] to-[#0284c7] [background-size:24px_12px] [background-image:linear-gradient(to_right,rgba(255,255,255,0.25)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.15)_1px,transparent_1px)] opacity-85"></div>
   </div>
 
-  <!-- LAYER 1: Destructible Webpage Foreground Canvas (Positioned dynamically in JS) -->
-  <canvas id="page-canvas" class="absolute left-0 top-0 z-10 cursor-crosshair origin-top-left"></canvas>
+  <!-- LAYER 1: Destructible Webpage Foreground Canvas -->
+  <canvas id="page-canvas" class="absolute inset-0 w-full h-full z-10 cursor-crosshair"></canvas>
 
-  <!-- LAYER 2: Physics Particles & Projectiles Canvas -->
+  <!-- LAYER 2: Physics Particles, Projectiles & Player Canvas -->
   <canvas id="fx-canvas" class="absolute inset-0 w-full h-full z-20 pointer-events-none"></canvas>
 
   <!-- HUD: Top-Left Domain & Destruction Meter -->
@@ -77,11 +77,6 @@ const {
     >
       🔄 Repair
     </button>
-  </div>
-
-  <!-- HUD: Right Side Minimap Scroll Depth Indicator -->
-  <div class="absolute right-3 top-20 bottom-24 z-30 w-1.5 bg-black/30 rounded-full overflow-hidden p-0.5 pointer-events-none hidden sm:block">
-    <div id="hud-depth-indicator" class="w-full bg-[#ff0077] rounded-full transition-all duration-75 shadow-[0_0_8px_#ff0077]" style="height: 30%; margin-top: 0%;"></div>
   </div>
 
   <!-- HUD: Bottom-Center Floating Pixel Weapon Dock -->
@@ -272,7 +267,7 @@ const {
       <!-- Controls Cheatsheet Footer in Modal -->
       <div class="pt-3 border-t border-purple-800/60 flex items-center justify-between text-[11px] font-mono text-purple-300">
         <div class="flex items-center gap-3">
-          <span><kbd class="px-1.5 py-0.5 bg-[#130324] text-[#00f0ff] rounded">WASD</kbd> run/fly</span>
+          <span><kbd class="px-1.5 py-0.5 bg-[#130324] text-[#00f0ff] rounded">WASD</kbd> move/jump</span>
           <span>🖱️ Wheel switch</span>
           <span>🖱️ Click shoot</span>
         </div>
@@ -288,14 +283,12 @@ const {
   const container = document.getElementById('game-container');
   const pageCanvas = document.getElementById('page-canvas') as HTMLCanvasElement;
   const fxCanvas = document.getElementById('fx-canvas') as HTMLCanvasElement;
-  const skyBg = document.getElementById('kawaii-sky-bg');
   const pageCtx = pageCanvas?.getContext('2d');
   const fxCtx = fxCanvas?.getContext('2d');
 
   const hudDomain = document.getElementById('hud-domain');
   const hudBar = document.getElementById('hud-bar');
   const hudPct = document.getElementById('hud-pct');
-  const hudDepth = document.getElementById('hud-depth-indicator');
   const modal = document.getElementById('arcade-modal');
   const modalInput = document.getElementById('modal-url-input') as HTMLInputElement;
 
@@ -307,19 +300,21 @@ const {
   let destructionScore = 0;
   let destructionPercent = 0;
 
-  // Single Unified Responsive Coordinate System
-  let viewW = 1000;
-  let viewH = 640;
-  let worldHeight = 1800;
-  let cameraY = 0;
+  // Exact Viewport Dimensions
+  let width = 1000;
+  let height = 640;
+
+  // Solid Platforms for jumping & standing
+  let platforms: { y: number; minX: number; maxX: number }[] = [];
 
   const player = {
     x: 500,
-    y: 110,
+    y: 140,
     vx: 0,
     vy: 0,
     facing: 1,
     jetpack: false,
+    grounded: false,
   };
 
   const keys: Record<string, boolean> = {};
@@ -423,52 +418,54 @@ const {
     pageCtx.fillStyle = '#00F0FF';
     pageCtx.font = 'bold 20px monospace';
     pageCtx.textAlign = 'center';
-    pageCtx.fillText(`📡 INTERCEPTING LIVE FEED: ${domain.toUpperCase()}`, w / 2, 280);
+    pageCtx.fillText(`📡 INTERCEPTING LIVE FEED: ${domain.toUpperCase()}`, w / 2, h / 2 - 20);
 
     pageCtx.fillStyle = '#FF659C';
     pageCtx.font = '13px monospace';
-    pageCtx.fillText('Converting multi-page DOM structure into destructible pixels...', w / 2, 315);
+    pageCtx.fillText('Rendering real-world DOM structure & visual layers...', w / 2, h / 2 + 15);
     pageCtx.textAlign = 'left';
   }
 
-  function updateDimensions() {
+  function resizeCanvases() {
     if (!container || !pageCanvas || !fxCanvas) return;
-    viewW = container.clientWidth || 1000;
-    viewH = container.clientHeight || 640;
-    worldHeight = Math.round(viewH * 2.5);
+    width = container.clientWidth || 1000;
+    height = container.clientHeight || 640;
 
-    pageCanvas.width = viewW;
-    pageCanvas.height = worldHeight;
-    pageCanvas.style.width = `${viewW}px`;
-    pageCanvas.style.height = `${worldHeight}px`;
+    pageCanvas.width = width;
+    pageCanvas.height = height;
+    fxCanvas.width = width;
+    fxCanvas.height = height;
 
-    fxCanvas.width = viewW;
-    fxCanvas.height = viewH;
+    // Build solid platform collision levels
+    platforms = [
+      { y: 150, minX: 0, maxX: width }, // Top header platform
+      { y: 340, minX: 0, maxX: width }, // Mid search platform
+      { y: height - 55, minX: 0, maxX: width } // Bottom solid floor
+    ];
   }
 
   function renderActiveCanvas() {
     if (!pageCtx || !pageCanvas) return;
 
-    updateDimensions();
+    resizeCanvases();
 
     pageCtx.globalCompositeOperation = 'source-over';
     pageCtx.fillStyle = '#FFFFFF';
-    pageCtx.fillRect(0, 0, viewW, worldHeight);
+    pageCtx.fillRect(0, 0, width, height);
 
     if (activeLiveImg) {
-      const imgAspect = activeLiveImg.width / activeLiveImg.height;
-      const targetH = viewW / imgAspect;
-      // Draw top hero and stretch gracefully across screens
-      pageCtx.drawImage(activeLiveImg, 0, 0, viewW, Math.max(worldHeight, targetH));
+      // Draw live website screenshot contained nicely within bounds
+      pageCtx.drawImage(activeLiveImg, 0, 0, width, height);
     } else {
       renderProceduralFallback(currentDomain);
     }
 
-    player.x = viewW / 2;
-    player.y = 110;
+    // Reset player standing solidly on top platform
+    player.x = width / 2;
+    player.y = 150;
     player.vx = 0;
     player.vy = 0;
-    cameraY = 0;
+    player.grounded = true;
 
     destructionScore = 0;
     destructionPercent = 0;
@@ -477,83 +474,73 @@ const {
 
   function renderProceduralFallback(domain: string) {
     if (!pageCtx || !pageCanvas) return;
+    const w = width;
+    const h = height;
 
     // Header Navbar
     pageCtx.fillStyle = '#0f172a';
-    pageCtx.fillRect(0, 0, viewW, 64);
+    pageCtx.fillRect(0, 0, w, 56);
     pageCtx.fillStyle = '#FFFFFF';
-    pageCtx.font = 'bold 20px sans-serif';
-    pageCtx.fillText(`🌐 https://${domain}`, 30, 40);
+    pageCtx.font = 'bold 18px sans-serif';
+    pageCtx.fillText(`🌐 https://${domain}`, 24, 34);
 
     pageCtx.fillStyle = '#38bdf8';
-    pageCtx.fillRect(viewW - 180, 16, 150, 34);
+    pageCtx.fillRect(w - 150, 14, 126, 28);
     pageCtx.fillStyle = '#0f172a';
-    pageCtx.font = 'bold 13px sans-serif';
-    pageCtx.fillText('Account / Sign In', viewW - 165, 38);
+    pageCtx.font = 'bold 12px sans-serif';
+    pageCtx.fillText('Sign In / Portal', w - 136, 32);
 
-    // Section 1: Hero Area
+    // Hero Header
     pageCtx.fillStyle = '#1e293b';
     pageCtx.font = 'bold 36px sans-serif';
-    pageCtx.fillText(`Welcome to ${domain}`, 50, 140);
+    pageCtx.fillText(`Welcome to ${domain}`, 40, 125);
     pageCtx.fillStyle = '#64748b';
-    pageCtx.font = '15px sans-serif';
-    pageCtx.fillText(`Explore and destroy every section on this multi-screen website!`, 50, 175);
+    pageCtx.font = '14px sans-serif';
+    pageCtx.fillText(`Interactive demolition sandbox. Destroy any element on this page!`, 40, 155);
 
-    pageCtx.fillStyle = '#f1f5f9';
-    pageCtx.fillRect(50, 210, viewW - 100, 300);
-    pageCtx.strokeStyle = '#cbd5e1';
-    pageCtx.lineWidth = 1;
-    pageCtx.strokeRect(50, 210, viewW - 100, 300);
-
-    pageCtx.fillStyle = '#ef4444';
-    pageCtx.fillRect(80, 250, 200, 44);
-    pageCtx.fillStyle = '#FFFFFF';
-    pageCtx.font = 'bold 15px sans-serif';
-    pageCtx.fillText('SUBMIT ORDER', 115, 278);
-
-    // Section 2: Middle Screen
-    pageCtx.fillStyle = '#0284c7';
-    pageCtx.fillRect(50, 560, viewW - 100, 360);
-    pageCtx.fillStyle = '#FFFFFF';
-    pageCtx.font = 'bold 28px sans-serif';
-    pageCtx.fillText('📊 Screen 2: Real-Time Analytics Dashboard', 80, 615);
-
-    pageCtx.fillStyle = '#ffffff';
-    pageCtx.fillRect(80, 650, (viewW - 200) / 3, 160);
-    pageCtx.fillRect(100 + (viewW - 200) / 3, 650, (viewW - 200) / 3, 160);
-    pageCtx.fillRect(120 + ((viewW - 200) / 3) * 2, 650, (viewW - 200) / 3, 160);
-
-    // Section 3: Lower Screen
+    // Content Card
     pageCtx.fillStyle = '#f8fafc';
-    pageCtx.fillRect(50, 960, viewW - 100, 400);
-    pageCtx.fillStyle = '#0f172a';
-    pageCtx.font = 'bold 26px sans-serif';
-    pageCtx.fillText('💬 Screen 3: User Reviews & Feedback Feed', 80, 1020);
+    pageCtx.fillRect(40, 185, w - 80, 260);
+    pageCtx.strokeStyle = '#e2e8f0';
+    pageCtx.lineWidth = 1;
+    pageCtx.strokeRect(40, 185, w - 80, 260);
+
+    pageCtx.fillStyle = '#0284c7';
+    pageCtx.fillRect(60, 215, 160, 40);
+    pageCtx.fillStyle = '#FFFFFF';
+    pageCtx.font = 'bold 14px sans-serif';
+    pageCtx.fillText('Primary Action', 85, 240);
+
+    pageCtx.fillStyle = '#334155';
+    pageCtx.font = '14px sans-serif';
+    pageCtx.fillText('• High-Performance Web Sandbox & Real-time Canvas Renderer', 60, 290);
+    pageCtx.fillText('• Destructible Layer Physics with Paper Shard Simulation', 60, 325);
+    pageCtx.fillText('• Retro Cyber-Arcade Kawaii Edition', 60, 360);
 
     // Footer
     pageCtx.fillStyle = '#0f172a';
-    pageCtx.fillRect(0, 1400, viewW, 400);
+    pageCtx.fillRect(0, h - 50, w, 50);
     pageCtx.fillStyle = '#94a3b8';
-    pageCtx.font = '14px sans-serif';
-    pageCtx.fillText(`© 2026 ${domain}. All rights reserved.`, 60, 1460);
+    pageCtx.font = '13px sans-serif';
+    pageCtx.fillText(`© 2026 ${domain}. All rights reserved.`, 40, h - 20);
   }
 
   window.addEventListener('resize', () => {
-    updateDimensions();
+    resizeCanvases();
     renderActiveCanvas();
   });
 
   // Dynamic Organic Blast Shapes with Pixel Dithering Border
-  function punchBlastHole(worldX: number, worldY: number, baseRadius: number, shape: 'small' | 'jagged' | 'star' | 'pellet' | 'huge' = 'jagged') {
+  function punchBlastHole(x: number, y: number, baseRadius: number, shape: 'small' | 'jagged' | 'star' | 'pellet' | 'huge' = 'jagged') {
     if (!pageCtx || !pageCanvas) return;
 
-    // 1. Pixel Dithering Dark Shadow Rim
+    // 1. Pixel Dithering Dark Shadow Rim around edge
     pageCtx.fillStyle = 'rgba(30, 41, 59, 0.4)';
     const shadowR = baseRadius + 2;
     for (let angle = 0; angle < Math.PI * 2; angle += 0.3) {
       if (Math.random() > 0.15) {
-        const px = worldX + Math.cos(angle) * (shadowR + (Math.random() - 0.5) * 2);
-        const py = worldY + Math.sin(angle) * (shadowR + (Math.random() - 0.5) * 2);
+        const px = x + Math.cos(angle) * (shadowR + (Math.random() - 0.5) * 2);
+        const py = y + Math.sin(angle) * (shadowR + (Math.random() - 0.5) * 2);
         pageCtx.fillRect(Math.round(px), Math.round(py), 3, 3);
       }
     }
@@ -563,7 +550,7 @@ const {
     pageCtx.beginPath();
 
     if (shape === 'small') {
-      pageCtx.arc(worldX, worldY, baseRadius, 0, Math.PI * 2);
+      pageCtx.arc(x, y, baseRadius, 0, Math.PI * 2);
     } else if (shape === 'star') {
       const points = 5;
       const outerR = baseRadius * 1.3;
@@ -571,8 +558,8 @@ const {
       for (let i = 0; i < points * 2; i++) {
         const r = i % 2 === 0 ? outerR : innerR;
         const angle = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
-        const px = worldX + Math.cos(angle) * r;
-        const py = worldY + Math.sin(angle) * r;
+        const px = x + Math.cos(angle) * r;
+        const py = y + Math.sin(angle) * r;
         if (i === 0) pageCtx.moveTo(px, py);
         else pageCtx.lineTo(px, py);
       }
@@ -581,20 +568,20 @@ const {
       for (let i = 0; i < points; i++) {
         const angle = (i / points) * Math.PI * 2;
         const r = baseRadius * (0.7 + Math.random() * 0.6);
-        const px = worldX + Math.cos(angle) * r;
-        const py = worldY + Math.sin(angle) * r;
+        const px = x + Math.cos(angle) * r;
+        const py = y + Math.sin(angle) * r;
         if (i === 0) pageCtx.moveTo(px, py);
         else pageCtx.lineTo(px, py);
       }
     } else if (shape === 'pellet') {
-      pageCtx.arc(worldX, worldY, baseRadius, 0, Math.PI * 2);
+      pageCtx.arc(x, y, baseRadius, 0, Math.PI * 2);
     } else {
       const points = 10;
       for (let i = 0; i < points; i++) {
         const angle = (i / points) * Math.PI * 2;
         const r = baseRadius * (0.75 + Math.random() * 0.5);
-        const px = worldX + Math.cos(angle) * r;
-        const py = worldY + Math.sin(angle) * r;
+        const px = x + Math.cos(angle) * r;
+        const py = y + Math.sin(angle) * r;
         if (i === 0) pageCtx.moveTo(px, py);
         else pageCtx.lineTo(px, py);
       }
@@ -603,10 +590,10 @@ const {
     pageCtx.closePath();
     pageCtx.fill();
 
-    spawnPaperShards(worldX, worldY, baseRadius);
+    spawnPaperShards(x, y, baseRadius);
 
-    // Balanced Calibrated Destruction Meter
-    destructionScore += (baseRadius * baseRadius * 0.0035);
+    // Balanced Destruction Scoring
+    destructionScore += (baseRadius * baseRadius * 0.005);
     destructionPercent = Math.min(100, Math.round(destructionScore));
     updateHUD();
   }
@@ -624,19 +611,19 @@ const {
     pageCtx.stroke();
 
     spawnPaperShards(x2, y2, width * 1.5);
-    destructionScore += 0.25;
+    destructionScore += 0.3;
     destructionPercent = Math.min(100, Math.round(destructionScore));
     updateHUD();
   }
 
-  function spawnPaperShards(worldX: number, worldY: number, radius: number) {
-    const count = Math.min(20, Math.max(2, Math.floor(radius * 0.5)));
+  function spawnPaperShards(x: number, y: number, radius: number) {
+    const count = Math.min(18, Math.max(2, Math.floor(radius * 0.5)));
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 6 + 2;
       paperShards.push({
-        x: worldX + (Math.random() - 0.5) * radius,
-        y: worldY + (Math.random() - 0.5) * radius,
+        x: x + (Math.random() - 0.5) * radius,
+        y: y + (Math.random() - 0.5) * radius,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed - 2.5,
         rot: Math.random() * Math.PI * 2,
@@ -644,7 +631,7 @@ const {
         size: Math.random() * 9 + 3,
         color: Math.random() > 0.4 ? '#FFFFFF' : '#CBD5E1',
         life: 0,
-        maxLife: Math.random() * 40 + 20,
+        maxLife: Math.random() * 35 + 20,
       });
     }
   }
@@ -653,22 +640,16 @@ const {
     if (hudBar) hudBar.style.width = `${destructionPercent}%`;
     if (hudPct) hudPct.textContent = `${destructionPercent}%`;
     if (hudDomain) hudDomain.textContent = currentDomain;
-
-    if (hudDepth) {
-      const maxCam = Math.max(1, worldHeight - viewH);
-      const pct = (cameraY / maxCam) * 100;
-      hudDepth.style.marginTop = `${Math.max(0, Math.min(70, pct * 0.7))}%`;
-    }
   }
 
   let lastShotTime = 0;
   function shootWeapon() {
     const now = performance.now();
-    const gunX = player.x + player.facing * 16;
+    const gunX = player.x + player.facing * 18;
     const gunY = player.y - 12;
 
     const targetX = mouseX;
-    const targetY = mouseY + cameraY;
+    const targetY = mouseY;
     const angle = Math.atan2(targetY - gunY, targetX - gunX);
 
     if (currentWeapon === 'pistol') {
@@ -833,10 +814,10 @@ const {
 
   function throwGrenade() {
     sfx.playBounce();
-    const gunX = player.x + player.facing * 16;
+    const gunX = player.x + player.facing * 18;
     const gunY = player.y - 12;
     const targetX = mouseX;
-    const targetY = mouseY + cameraY;
+    const targetY = mouseY;
     const dist = Math.hypot(targetX - gunX, targetY - gunY);
     const timeFrames = Math.max(20, Math.min(45, dist / 14));
     const gravity = 0.4;
@@ -880,12 +861,12 @@ const {
     }
 
     // Shadow on surface
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
     ctx.beginPath();
     ctx.ellipse(0, 24, 14, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Body
+    // Cute Orange Bunny Body
     ctx.fillStyle = '#FF6B00';
     ctx.fillRect(-12, -14, 24, 24);
     ctx.fillStyle = '#FF9E00';
@@ -946,23 +927,8 @@ const {
   }
 
   function gameLoop() {
-    if (fxCtx && fxCanvas && container) {
-      // Smooth camera follows player vertically
-      const maxCameraY = Math.max(0, worldHeight - viewH);
-      const targetCameraY = Math.max(0, Math.min(maxCameraY, player.y - viewH * 0.45));
-      cameraY += (targetCameraY - cameraY) * 0.12;
-
-      // Update position of foreground page canvas
-      if (pageCanvas) {
-        pageCanvas.style.transform = `translate3d(0, ${-cameraY}px, 0)`;
-      }
-
-      // Parallax on sky backdrop
-      if (skyBg) {
-        skyBg.style.transform = `translate3d(0, ${-cameraY * 0.25}px, 0)`;
-      }
-
-      fxCtx.clearRect(0, 0, viewW, viewH);
+    if (fxCtx && fxCanvas) {
+      fxCtx.clearRect(0, 0, width, height);
 
       // Multi-Input Check: WASD / Arrows
       const keyLeft = keys['KeyA'] || keys['ArrowLeft'] || keys['a'] || keys['A'];
@@ -970,6 +936,7 @@ const {
       const keyUp = keys['Space'] || keys['KeyW'] || keys['ArrowUp'] || keys['w'] || keys['W'];
       const keyDown = keys['KeyS'] || keys['ArrowDown'] || keys['s'] || keys['S'];
 
+      // Horizontal movement
       if (keyLeft) {
         player.vx = -5;
         player.facing = -1;
@@ -989,48 +956,52 @@ const {
         player.vx *= 0.8;
       }
 
+      // Vertical jumping & jetpack
       if (keyUp) {
         player.vy = -6.5;
         player.jetpack = true;
+        player.grounded = false;
       } else {
         player.jetpack = false;
-        player.vy += 0.38;
+        player.vy += 0.38; // Normal Gravity
       }
 
+      const prevY = player.y;
       player.x += player.vx;
       player.y += player.vy;
 
-      // Platform Collisions along the long page
-      if (!keyDown && player.vy >= 0) {
-        if (player.y >= 100 && player.y <= 118) {
-          player.y = 110;
-          player.vy = 0;
-        } else if (player.y >= 500 && player.y <= 518) {
-          player.y = 510;
-          player.vy = 0;
-        } else if (player.y >= 900 && player.y <= 918) {
-          player.y = 910;
-          player.vy = 0;
+      // Platform Collision Detection
+      player.grounded = false;
+      const floorY = height - 55;
+
+      if (player.y >= floorY) {
+        player.y = floorY;
+        player.vy = 0;
+        player.grounded = true;
+      } else if (!keyDown && player.vy > 0) {
+        // Check floating platforms if falling downward
+        for (const plat of platforms) {
+          if (prevY <= plat.y && player.y >= plat.y && player.x >= plat.minX && player.x <= plat.maxX) {
+            player.y = plat.y;
+            player.vy = 0;
+            player.grounded = true;
+            break;
+          }
         }
       }
 
-      // World bounds
+      // Horizontal Boundaries
       if (player.x < 30) player.x = 30;
-      if (player.x > viewW - 30) player.x = viewW - 30;
-      if (player.y > worldHeight - 50) {
-        player.y = worldHeight - 50;
+      if (player.x > width - 30) player.x = width - 30;
+      if (player.y < 50) {
+        player.y = 50;
         player.vy = 0;
       }
-      if (player.y < 40) player.y = 40;
 
-      // Fire weapon
+      // Continuous firing
       if (isMouseDown && !modal?.classList.contains('flex')) {
         shootWeapon();
       }
-
-      // Render FX in Camera World Space
-      fxCtx.save();
-      fxCtx.translate(0, -cameraY);
 
       // Projectiles loop
       for (let i = projectiles.length - 1; i >= 0; i--) {
@@ -1121,13 +1092,13 @@ const {
         fxCtx.fillRect(-s.size / 2, -s.size / 2, s.size, s.size * 0.7);
         fxCtx.restore();
 
-        if (s.life >= s.maxLife || s.y > worldHeight + 20) {
+        if (s.life >= s.maxLife || s.y > height + 20) {
           paperShards.splice(i, 1);
         }
       }
 
+      // Draw Bunny Player on top of all elements!
       drawPlayer(fxCtx);
-      fxCtx.restore();
     }
     requestAnimationFrame(gameLoop);
   }
@@ -1421,7 +1392,7 @@ const {
   const initialTarget = urlParams.get('target') || initialTargetDomain || 'wikipedia.org';
   if (modalInput) modalInput.value = initialTarget;
 
-  updateDimensions();
+  resizeCanvases();
   renderActiveCanvas();
   loadLiveWebsiteScreenshot(initialTarget);
   gameLoop();
