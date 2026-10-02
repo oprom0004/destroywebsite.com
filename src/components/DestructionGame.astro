@@ -57,8 +57,16 @@ const {
     </div>
   </div>
 
-  <!-- HUD: Top-Right Sound & Fullscreen Controls -->
+  <!-- HUD: Top-Right Sound, Snapshot & Repair Controls -->
   <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
+    <button
+      id="btn-snapshot"
+      class="px-3 py-1.5 bg-gradient-to-r from-[#ff0077] to-[#9900ff] hover:scale-105 active:scale-95 backdrop-blur-md border border-[#ff659c] rounded-xl text-xs font-mono font-black text-white shadow-[0_0_15px_rgba(255,0,119,0.5)] transition-all flex items-center gap-1.5"
+      title="Generate Demolition Certificate & Share"
+    >
+      <span>📸</span>
+      <span class="hidden sm:inline">Certificate</span>
+    </button>
     <button
       id="btn-sound"
       class="px-3 py-1.5 bg-[#25093e]/90 hover:bg-[#ff4081]/30 backdrop-blur-md border border-[#ff659c]/50 rounded-xl text-xs font-mono text-white transition-colors"
@@ -133,6 +141,72 @@ const {
           <span>🍓 RMB</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- SHARE & DEMOLITION CERTIFICATE MODAL -->
+  <div id="cert-modal" class="hidden absolute inset-0 z-50 bg-[#0f021e]/85 backdrop-blur-lg items-center justify-center p-4">
+    <div class="w-full max-w-xl bg-gradient-to-b from-[#2d084d] to-[#140124] border-2 border-[#ff659c] rounded-3xl p-5 sm:p-6 shadow-[0_0_80px_rgba(255,101,156,0.7)] space-y-4 text-center relative max-h-[90vh] overflow-y-auto">
+      
+      <!-- Close Button -->
+      <button id="btn-close-cert" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white font-mono text-sm flex items-center justify-center transition-colors">
+        ✕
+      </button>
+
+      <!-- Badge Header -->
+      <div class="inline-flex items-center gap-2 px-4 py-1 bg-[#ff659c]/20 border border-[#ff659c]/50 rounded-full text-xs font-mono font-bold text-[#ff9ebb]">
+        <span>🏆</span>
+        <span>OFFICIAL CERTIFICATE OF WEB DEMOLITION</span>
+      </div>
+
+      <!-- Live Generated Snapshot Canvas -->
+      <div class="relative rounded-2xl overflow-hidden border-2 border-[#00f0ff]/60 shadow-[0_0_30px_rgba(0,240,255,0.3)] bg-[#0a0014] aspect-[16/10] max-h-[250px] flex items-center justify-center">
+        <canvas id="cert-canvas" class="w-full h-full object-contain"></canvas>
+      </div>
+
+      <!-- Stats Summary Grid -->
+      <div class="grid grid-cols-3 gap-2 bg-[#1b0330]/80 p-3 rounded-2xl border border-purple-500/30 text-xs font-mono">
+        <div>
+          <span class="text-purple-300 block text-[10px]">TARGET DOMAIN</span>
+          <span id="cert-domain-text" class="text-white font-bold truncate block">wikipedia.org</span>
+        </div>
+        <div>
+          <span class="text-purple-300 block text-[10px]">DESTRUCTION</span>
+          <span id="cert-pct-text" class="text-[#ff659c] font-black text-sm block">100%</span>
+        </div>
+        <div>
+          <span class="text-purple-300 block text-[10px]">THREAT RANK</span>
+          <span id="cert-rank-text" class="text-[#ffea00] font-black text-sm block">S-CLASS ⚡</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+        <!-- Copy Image -->
+        <button id="btn-copy-cert" class="px-4 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#0077ff] hover:scale-105 active:scale-95 text-[#001122] font-black text-xs sm:text-sm rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.5)] font-mono transition-transform flex items-center gap-1.5">
+          <span>📋</span>
+          <span id="copy-btn-text">Copy Image</span>
+        </button>
+
+        <!-- Download PNG -->
+        <button id="btn-download-cert" class="px-4 py-2.5 bg-[#25093e] hover:bg-[#ff4081]/30 border border-[#ff659c] text-white font-bold text-xs sm:text-sm rounded-xl font-mono transition-all flex items-center gap-1.5">
+          <span>💾</span>
+          <span>Download PNG</span>
+        </button>
+
+        <!-- Share to X (Twitter) -->
+        <button id="btn-share-x" class="px-4 py-2.5 bg-black hover:bg-neutral-800 border border-white/30 text-white font-bold text-xs sm:text-sm rounded-xl font-mono transition-all flex items-center gap-1.5">
+          <span>𝕏</span>
+          <span>Share to X</span>
+        </button>
+
+        <!-- Copy Challenge Link -->
+        <button id="btn-share-link" class="px-4 py-2.5 bg-[#1b0330] hover:bg-[#3b0863] border border-purple-500/40 text-purple-200 font-bold text-xs sm:text-sm rounded-xl font-mono transition-all flex items-center gap-1.5">
+          <span>🔗</span>
+          <span id="link-btn-text">Challenge Link</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -1133,18 +1207,198 @@ const {
     modal?.classList.add('flex');
   });
 
-  document.getElementById('btn-repair')?.addEventListener('click', () => {
-    renderActiveCanvas();
+  const certModal = document.getElementById('cert-modal');
+  const certCanvas = document.getElementById('cert-canvas') as HTMLCanvasElement;
+  const certCtx = certCanvas?.getContext('2d');
+  const certDomainText = document.getElementById('cert-domain-text');
+  const certPctText = document.getElementById('cert-pct-text');
+  const certRankText = document.getElementById('cert-rank-text');
+
+  function generateDemolitionCertificate() {
+    if (!certCanvas || !certCtx || !pageCanvas) return;
+
+    certCanvas.width = 800;
+    certCanvas.height = 500;
+    const cw = certCanvas.width;
+    const ch = certCanvas.height;
+
+    // 1. Background: Dark Cyber Gradient
+    const grad = certCtx.createLinearGradient(0, 0, cw, ch);
+    grad.addColorStop(0, '#15002b');
+    grad.addColorStop(0.5, '#2b004d');
+    grad.addColorStop(1, '#0d001a');
+    certCtx.fillStyle = grad;
+    certCtx.fillRect(0, 0, cw, ch);
+
+    // 2. Neon Certificate Frame Border
+    certCtx.strokeStyle = '#ff0077';
+    certCtx.lineWidth = 6;
+    certCtx.strokeRect(16, 16, cw - 32, ch - 32);
+
+    certCtx.strokeStyle = '#00f0ff';
+    certCtx.lineWidth = 2;
+    certCtx.strokeRect(24, 24, cw - 48, ch - 48);
+
+    // 3. Header Ribbon & Title
+    certCtx.fillStyle = '#ff0077';
+    certCtx.fillRect(cw / 2 - 200, 32, 400, 36);
+    certCtx.fillStyle = '#FFFFFF';
+    certCtx.font = 'bold 15px monospace';
+    certCtx.textAlign = 'center';
+    certCtx.fillText('★ OFFICIAL DEMOLITION CERTIFICATE ★', cw / 2, 56);
+
+    // 4. Capture and composite the current destroyed scene
+    const compositeCanvas = document.createElement('canvas');
+    compositeCanvas.width = pageCanvas.width;
+    compositeCanvas.height = pageCanvas.height;
+    const compCtx = compositeCanvas.getContext('2d');
+    if (compCtx) {
+      const bgGrad = compCtx.createLinearGradient(0, 0, 0, pageCanvas.height);
+      bgGrad.addColorStop(0, '#1a0033');
+      bgGrad.addColorStop(0.5, '#ff4081');
+      bgGrad.addColorStop(1, '#ffea00');
+      compCtx.fillStyle = bgGrad;
+      compCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+      compCtx.drawImage(pageCanvas, 0, 0);
+      if (fxCanvas) compCtx.drawImage(fxCanvas, 0, 0);
+
+      const snapW = cw - 120;
+      const snapH = 240;
+      const snapX = 60;
+      const snapY = 86;
+
+      certCtx.save();
+      certCtx.strokeStyle = '#00f0ff';
+      certCtx.lineWidth = 3;
+      certCtx.strokeRect(snapX - 2, snapY - 2, snapW + 4, snapH + 4);
+      certCtx.drawImage(compositeCanvas, snapX, snapY, snapW, snapH);
+      certCtx.restore();
+    }
+
+    // 5. Threat Rank calculation
+    let rank = 'B-RANK SMASHER 🎯';
+    if (destructionPercent >= 90) rank = 'S-CLASS OBLITERATOR ⚡';
+    else if (destructionPercent >= 60) rank = 'A-RANK DEMOLISHER 💥';
+    else if (destructionPercent >= 30) rank = 'B-RANK STRIKER 🎯';
+
+    // 6. Certificate Metadata Footer
+    certCtx.textAlign = 'left';
+    certCtx.fillStyle = '#FFFFFF';
+    certCtx.font = 'bold 14px monospace';
+    certCtx.fillText(`TARGET: ${currentDomain.toUpperCase()}`, 60, 360);
+
+    certCtx.fillStyle = '#ff659c';
+    certCtx.font = 'bold 18px monospace';
+    certCtx.fillText(`DESTRUCTION: ${destructionPercent}% COMPLETE`, 60, 390);
+
+    certCtx.fillStyle = '#00f0ff';
+    certCtx.font = 'bold 13px monospace';
+    certCtx.fillText(`RANK: ${rank}`, 60, 418);
+
+    // 7. Right Stamp Seal
+    certCtx.save();
+    certCtx.translate(cw - 140, 390);
+    certCtx.rotate(-0.15);
+    certCtx.beginPath();
+    certCtx.arc(0, 0, 42, 0, Math.PI * 2);
+    certCtx.strokeStyle = '#ffea00';
+    certCtx.lineWidth = 3;
+    certCtx.stroke();
+    certCtx.fillStyle = '#ffea00';
+    certCtx.font = 'bold 10px monospace';
+    certCtx.textAlign = 'center';
+    certCtx.fillText('VERIFIED', 0, -10);
+    certCtx.fillText('DEMOLITION', 0, 4);
+    certCtx.fillText('★ ★ ★', 0, 18);
+    certCtx.restore();
+
+    // 8. Watermark
+    certCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    certCtx.font = '11px monospace';
+    certCtx.textAlign = 'center';
+    certCtx.fillText('DestroyAnyWebsite Edition • Play free at DestroyWebsite.com', cw / 2, 465);
+
+    // Update text elements in DOM
+    if (certDomainText) certDomainText.textContent = currentDomain;
+    if (certPctText) certPctText.textContent = `${destructionPercent}%`;
+    if (certRankText) certRankText.textContent = rank;
+
+    // Show modal
+    certModal?.classList.remove('hidden');
+    certModal?.classList.add('flex');
+  }
+
+  // Hook Snapshot Button
+  document.getElementById('btn-snapshot')?.addEventListener('click', () => {
+    generateDemolitionCertificate();
   });
 
-  document.getElementById('btn-sound')?.addEventListener('click', () => {
-    const isMuted = sfx.toggleMute();
-    const btn = document.getElementById('btn-sound');
-    if (btn) btn.textContent = isMuted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
+  document.getElementById('btn-close-cert')?.addEventListener('click', () => {
+    certModal?.classList.add('hidden');
+    certModal?.classList.remove('flex');
   });
+
+  // Copy Image to Clipboard
+  document.getElementById('btn-copy-cert')?.addEventListener('click', async () => {
+    if (!certCanvas) return;
+    try {
+      certCanvas.toBlob(async (blob) => {
+        if (!blob) return;
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        const copyBtnText = document.getElementById('copy-btn-text');
+        if (copyBtnText) {
+          copyBtnText.textContent = 'Copied! 🎉';
+          setTimeout(() => {
+            copyBtnText.textContent = 'Copy Image';
+          }, 2500);
+        }
+      });
+    } catch {
+      // Fallback
+      alert('Certificate snapshot created! You can right-click or use Download PNG.');
+    }
+  });
+
+  // Download PNG
+  document.getElementById('btn-download-cert')?.addEventListener('click', () => {
+    if (!certCanvas) return;
+    const a = document.createElement('a');
+    a.download = `demolition-certificate-${currentDomain}-${destructionPercent}pct.png`;
+    a.href = certCanvas.toDataURL('image/png');
+    a.click();
+  });
+
+  // Share to X (Twitter)
+  document.getElementById('btn-share-x')?.addEventListener('click', () => {
+    const text = `I just obliterated ${currentDomain} to ${destructionPercent}% destruction on DestroyWebsite.com! 💥 Destroy any website in your browser here:`;
+    const shareUrl = `https://destroywebsite.com/?target=${encodeURIComponent(currentDomain)}&challenge=${destructionPercent}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+  });
+
+  // Copy Challenge Link
+  document.getElementById('btn-share-link')?.addEventListener('click', () => {
+    const challengeUrl = `${window.location.origin}/?target=${encodeURIComponent(currentDomain)}&challenge=${destructionPercent}`;
+    navigator.clipboard.writeText(challengeUrl);
+    const linkBtnText = document.getElementById('link-btn-text');
+    if (linkBtnText) {
+      linkBtnText.textContent = 'Link Copied! 🔗';
+      setTimeout(() => {
+        linkBtnText.textContent = 'Challenge Link';
+      }, 2500);
+    }
+  });
+
+  // Check URL params on initial load
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTarget = urlParams.get('target') || initialTargetDomain || 'wikipedia.org';
+  if (modalInput) modalInput.value = initialTarget;
 
   // Initial load
   resizeCanvases();
-  loadLiveWebsiteScreenshot('wikipedia.org');
+  loadLiveWebsiteScreenshot(initialTarget);
   gameLoop();
 </script>
