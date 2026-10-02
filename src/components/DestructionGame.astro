@@ -210,7 +210,6 @@ const {
 <script>
   import { sfx } from '../lib/sound';
 
-  // Game Elements
   const container = document.getElementById('game-container');
   const pageCanvas = document.getElementById('page-canvas') as HTMLCanvasElement;
   const fxCanvas = document.getElementById('fx-canvas') as HTMLCanvasElement;
@@ -230,24 +229,18 @@ const {
   let mouseX = 400;
   let mouseY = 300;
   let destructionPercent = 0;
-  let totalHolePixels = 0;
-  let sampleTotalPixels = 1;
 
-  // Player Character State
   const player = {
-    x: 200,
-    y: 260,
+    x: 400,
+    y: 105,
     vx: 0,
     vy: 0,
-    facing: 1, // 1 for right, -1 for left
-    isGrounded: false,
+    facing: 1,
     jetpack: false,
-    aimAngle: 0,
   };
 
   const keys: Record<string, boolean> = {};
 
-  // Physics Particles & Projectiles
   interface Projectile {
     x: number;
     y: number;
@@ -288,20 +281,16 @@ const {
 
   window.addEventListener('resize', resizeCanvases);
 
-  // Render the authentic white webpage on the foreground canvas
   function renderWebpageTemplate(domain: string, theme: string) {
     if (!pageCtx || !pageCanvas) return;
     const w = pageCanvas.width;
     const h = pageCanvas.height;
 
-    // Reset composite operation to normal
     pageCtx.globalCompositeOperation = 'source-over';
     pageCtx.fillStyle = '#FFFFFF';
     pageCtx.fillRect(0, 0, w, h);
 
-    // Draw Simulated Webpage Graphics
     if (theme === 'wiki' || domain.includes('wikipedia')) {
-      // Header
       pageCtx.fillStyle = '#000000';
       pageCtx.font = 'bold 22px Georgia, serif';
       pageCtx.fillText('WIKIPEDIA', w / 2 - 60, 50);
@@ -309,7 +298,6 @@ const {
       pageCtx.fillStyle = '#555555';
       pageCtx.fillText('The Free Encyclopedia · 6,850,000+ Articles', w / 2 - 120, 72);
 
-      // Wikipedia Globe Logo Icon
       pageCtx.beginPath();
       pageCtx.arc(w / 2, 130, 42, 0, Math.PI * 2);
       pageCtx.fillStyle = '#F8FAFC';
@@ -321,7 +309,6 @@ const {
       pageCtx.font = 'bold 28px serif';
       pageCtx.fillText('W', w / 2 - 14, 140);
 
-      // Language Links grid
       pageCtx.font = 'bold 13px sans-serif';
       pageCtx.fillStyle = '#0645AD';
       pageCtx.fillText('English · 6,850,000+ entries', 60, 120);
@@ -331,7 +318,6 @@ const {
       pageCtx.fillText('日本語 · 1,420,000+ 記事', w - 240, 160);
       pageCtx.fillText('Русский · 1,990,000+ статей', w - 240, 200);
 
-      // Main Article Box
       pageCtx.fillStyle = '#F8F9FA';
       pageCtx.fillRect(60, 240, w - 120, 180);
       pageCtx.lineWidth = 1;
@@ -347,12 +333,10 @@ const {
       pageCtx.fillText('In early internet animation, stick figures were popularized by series such as Xiao Xiao and Pivot Animator.', 80, 335);
       pageCtx.fillText('Destructible web engines allow real-time tear physics across DOM structures and interactive canvases.', 80, 360);
 
-      // Footer
       pageCtx.fillStyle = '#72777D';
       pageCtx.font = '11px sans-serif';
       pageCtx.fillText('Text is available under the Creative Commons Attribution-ShareAlike License 4.0', 80, 480);
     } else if (theme === 'google' || domain.includes('google')) {
-      // Google logo
       pageCtx.font = 'bold 48px sans-serif';
       pageCtx.fillStyle = '#4285F4';
       pageCtx.fillText('G', w / 2 - 70, 150);
@@ -367,7 +351,6 @@ const {
       pageCtx.fillStyle = '#EA4335';
       pageCtx.fillText('e', w / 2 + 70, 150);
 
-      // Search bar
       pageCtx.fillStyle = '#FFFFFF';
       pageCtx.beginPath();
       pageCtx.roundRect(w / 2 - 200, 190, 400, 44, 22);
@@ -380,7 +363,6 @@ const {
       pageCtx.font = '14px sans-serif';
       pageCtx.fillText('🔍 Search Google or type a URL...', w / 2 - 170, 218);
 
-      // Buttons
       pageCtx.fillStyle = '#F8F9FA';
       pageCtx.fillRect(w / 2 - 140, 260, 130, 36);
       pageCtx.fillRect(w / 2 + 10, 260, 140, 36);
@@ -389,7 +371,6 @@ const {
       pageCtx.fillText('Google Search', w / 2 - 120, 283);
       pageCtx.fillText("I'm Feeling Lucky", w / 2 + 25, 283);
     } else {
-      // Generic Custom Site / School Portal
       pageCtx.fillStyle = '#1E293B';
       pageCtx.fillRect(40, 40, w - 80, 50);
       pageCtx.fillStyle = '#FFFFFF';
@@ -415,7 +396,6 @@ const {
       pageCtx.fillText('SUBMIT HOMEWORK NOW', 80, 348);
     }
 
-    // Spawn player standing on the top header platform
     player.x = w / 2;
     player.y = 105;
     player.vx = 0;
@@ -425,15 +405,12 @@ const {
     updateHUD();
   }
 
-  // Tear a hole in the white page (Reveal the synthwave city!)
   function punchBlastHole(x: number, y: number, radius: number) {
     if (!pageCtx) return;
 
-    // Use destination-out to erase pixels and make hole transparent
     pageCtx.globalCompositeOperation = 'destination-out';
     pageCtx.beginPath();
 
-    // Create jagged polygon hole
     const points = 10;
     for (let i = 0; i < points; i++) {
       const angle = (i / points) * Math.PI * 2;
@@ -446,10 +423,8 @@ const {
     pageCtx.closePath();
     pageCtx.fill();
 
-    // Spawn falling torn paper shards
     spawnPaperShards(x, y, radius);
 
-    // Increment destruction meter
     destructionPercent = Math.min(100, destructionPercent + Math.round(radius / 7));
     updateHUD();
   }
@@ -463,7 +438,7 @@ const {
         x: x + (Math.random() - 0.5) * radius,
         y: y + (Math.random() - 0.5) * radius,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 2, // initial upward pop
+        vy: Math.sin(angle) * speed - 2,
         rot: Math.random() * Math.PI * 2,
         vRot: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 10 + 4,
@@ -480,13 +455,11 @@ const {
     if (hudDomain) hudDomain.textContent = currentDomain;
   }
 
-  // Player Shoot Action
   let lastShotTime = 0;
   function shootWeapon() {
     const now = performance.now();
     const gunX = player.x + player.facing * 16;
     const gunY = player.y - 12;
-
     const angle = Math.atan2(mouseY - gunY, mouseX - gunX);
 
     if (currentWeapon === 'uzi') {
@@ -522,7 +495,6 @@ const {
       }
     } else if (currentWeapon === 'laser') {
       sfx.playLaser();
-      // Continuous laser beam
       punchBlastHole(mouseX, mouseY, 16);
     } else if (currentWeapon === 'magic') {
       if (now - lastShotTime < 180) return;
@@ -571,7 +543,6 @@ const {
       if (now - lastShotTime < 2000) return;
       lastShotTime = now;
       sfx.playNuke();
-      // Massive screen wipeout holes
       for (let i = 0; i < 8; i++) {
         setTimeout(() => {
           if (!pageCanvas) return;
@@ -583,7 +554,6 @@ const {
     }
   }
 
-  // Throw Strawberry Grenade (Right-Click)
   function throwGrenade() {
     sfx.playBounce();
     const gunX = player.x + player.facing * 16;
@@ -601,12 +571,11 @@ const {
     });
   }
 
-    // Enhanced Kawaii Pixel Hero Avatar (Vibrant Neon Orange & Rabbit Ears)
+  function drawPlayer(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.translate(player.x, player.y);
     if (player.facing === -1) ctx.scale(-1, 1);
 
-    // Jetpack animated flames if hovering
     if (player.jetpack) {
       ctx.fillStyle = '#00F0FF';
       ctx.fillRect(-16, 12, 6, Math.random() * 16 + 8);
@@ -614,29 +583,24 @@ const {
       ctx.fillRect(-14, 14, 4, Math.random() * 10 + 4);
     }
 
-    // Shadow on paper
     ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
     ctx.beginPath();
     ctx.ellipse(0, 24, 14, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Body: Neon Orange Anime Outfit
     ctx.fillStyle = '#FF6B00';
     ctx.fillRect(-12, -14, 24, 24);
     ctx.fillStyle = '#FF9E00';
     ctx.fillRect(-8, -10, 16, 16);
 
-    // Jetpack Booster Backpack
     ctx.fillStyle = '#25093E';
     ctx.fillRect(-16, -10, 6, 18);
     ctx.fillStyle = '#00F0FF';
     ctx.fillRect(-16, -6, 2, 8);
 
-    // Head
-    ctx.fillStyle = '#FFE5D9'; // Soft skin
+    ctx.fillStyle = '#FFE5D9';
     ctx.fillRect(-11, -32, 22, 20);
 
-    // Long Kawaii Ears (Neon Orange & Pink inner)
     ctx.fillStyle = '#FF6B00';
     ctx.fillRect(-12, -44, 7, 14);
     ctx.fillRect(5, -44, 7, 14);
@@ -644,21 +608,17 @@ const {
     ctx.fillRect(-10, -42, 3, 10);
     ctx.fillRect(7, -42, 3, 10);
 
-    // Big Anime Eyes
     ctx.fillStyle = '#1A0033';
     ctx.fillRect(2, -26, 4, 8);
     ctx.fillRect(-7, -26, 4, 8);
-    // Eye sparkle
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(3, -25, 2, 3);
     ctx.fillRect(-6, -25, 2, 3);
 
-    // Cute Cheerful Blush
     ctx.fillStyle = '#FF4081';
     ctx.fillRect(4, -18, 4, 3);
     ctx.fillRect(-9, -18, 4, 3);
 
-    // Legs & Cute Shoes
     ctx.fillStyle = '#1A0033';
     ctx.fillRect(-8, 10, 6, 12);
     ctx.fillRect(2, 10, 6, 12);
@@ -666,7 +626,6 @@ const {
     ctx.fillRect(-10, 18, 8, 5);
     ctx.fillRect(2, 18, 8, 5);
 
-    // Pixel Weapon in Hand
     ctx.fillStyle = '#334155';
     ctx.fillRect(6, -6, 16, 7);
     ctx.fillStyle = '#FF4081';
@@ -677,12 +636,10 @@ const {
     ctx.restore();
   }
 
-  // Main Loop
   function gameLoop() {
     if (fxCtx && fxCanvas) {
       fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
 
-      // Player Movement Logic
       if (keys['KeyA'] || keys['ArrowLeft']) {
         player.vx = -4;
         player.facing = -1;
@@ -698,28 +655,23 @@ const {
         player.jetpack = true;
       } else {
         player.jetpack = false;
-        player.vy += 0.35; // gravity
+        player.vy += 0.35;
       }
 
       player.x += player.vx;
       player.y += player.vy;
 
-      // Platform Collisions (Stand on top of webpage header & article box)
       const isDroppingDown = keys['KeyS'] || keys['ArrowDown'];
       if (!isDroppingDown && player.vy >= 0) {
-        // Platform 1: Top Header (y = 105)
         if (player.y >= 95 && player.y <= 112) {
           player.y = 105;
           player.vy = 0;
-        }
-        // Platform 2: Middle Article Box (y = 235)
-        else if (player.y >= 225 && player.y <= 242) {
+        } else if (player.y >= 225 && player.y <= 242) {
           player.y = 235;
           player.vy = 0;
         }
       }
 
-      // Arena bounds
       if (player.x < 30) player.x = 30;
       if (player.x > fxCanvas.width - 30) player.x = fxCanvas.width - 30;
       if (player.y > fxCanvas.height - 40) {
@@ -728,12 +680,10 @@ const {
       }
       if (player.y < 40) player.y = 40;
 
-      // Handle continuous firing if mouse held
       if (isMouseDown && !modal?.classList.contains('flex')) {
         shootWeapon();
       }
 
-      // Update & Draw Projectiles
       for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
         p.x += p.vx;
@@ -741,8 +691,7 @@ const {
         p.life++;
 
         if (p.type === 'grenade') {
-          p.vy += 0.3; // gravity
-          // Bounce off bottom
+          p.vy += 0.3;
           if (p.y >= fxCanvas.height - 30) {
             p.y = fxCanvas.height - 30;
             p.vy = -p.vy * 0.6;
@@ -750,11 +699,9 @@ const {
             sfx.playBounce();
           }
 
-          // Draw Strawberry Grenade
           fxCtx.font = '16px serif';
           fxCtx.fillText('🍓', p.x - 8, p.y + 6);
 
-          // Detonate after 1.2s (70 frames)
           if (p.life > 70) {
             sfx.playExplosion();
             punchBlastHole(p.x, p.y, 75);
@@ -762,13 +709,11 @@ const {
             continue;
           }
         } else if (p.type === 'rocket') {
-          // Smoke trail
           fxCtx.fillStyle = '#FF0055';
           fxCtx.beginPath();
           fxCtx.arc(p.x, p.y, 6, 0, Math.PI * 2);
           fxCtx.fill();
 
-          // Rocket impact
           if (p.life > 25 || p.x < 0 || p.x > fxCanvas.width || p.y < 0 || p.y > fxCanvas.height) {
             sfx.playExplosion();
             punchBlastHole(p.x, p.y, 65);
@@ -784,13 +729,11 @@ const {
             continue;
           }
         } else {
-          // Bullet
           fxCtx.fillStyle = p.color;
           fxCtx.beginPath();
           fxCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
           fxCtx.fill();
 
-          // Bullet hits paper
           if (p.life > 18) {
             punchBlastHole(p.x, p.y, 22);
             projectiles.splice(i, 1);
@@ -799,12 +742,11 @@ const {
         }
       }
 
-      // Update & Draw Falling Paper Shards
       for (let i = paperShards.length - 1; i >= 0; i--) {
         const s = paperShards[i];
         s.x += s.vx;
         s.y += s.vy;
-        s.vy += 0.25; // gravity
+        s.vy += 0.25;
         s.rot += s.vRot;
         s.life++;
 
@@ -820,17 +762,14 @@ const {
         }
       }
 
-      // Draw Player Character
       drawPlayer(fxCtx);
     }
     requestAnimationFrame(gameLoop);
   }
 
-  // Keyboard Event Listeners
   window.addEventListener('keydown', (e) => {
     keys[e.code] = true;
 
-    // Number keys for weapon slots
     const weaponMap: Record<string, string> = {
       'Digit1': 'uzi',
       'Digit2': 'laser',
@@ -849,7 +788,6 @@ const {
     keys[e.code] = false;
   });
 
-  // Mouse Crosshair & Shooting Tracking
   container?.addEventListener('mousemove', (e) => {
     const rect = container.getBoundingClientRect();
     mouseX = e.clientX - rect.left;
@@ -878,7 +816,6 @@ const {
     throwGrenade();
   });
 
-  // Weapon Slot UI selection
   function selectWeapon(id: string) {
     currentWeapon = id;
     document.querySelectorAll('.weapon-slot').forEach((btn) => {
@@ -900,7 +837,6 @@ const {
     });
   });
 
-  // Modal Actions
   document.getElementById('btn-modal-destroy')?.addEventListener('click', () => {
     const inputVal = modalInput?.value?.trim() || 'wikipedia.org';
     const cleanDomain = inputVal.replace(/^(?:https?:\/\/)?(?:www\.)?/i, '').split('/')[0];
@@ -939,7 +875,6 @@ const {
     if (btn) btn.textContent = isMuted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
   });
 
-  // Start Engine
   resizeCanvases();
   gameLoop();
 </script>
