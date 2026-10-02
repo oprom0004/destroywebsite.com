@@ -405,46 +405,86 @@ const {
     updateHUD();
   }
 
-  function punchBlastHole(x: number, y: number, radius: number) {
+  // Dynamic Organic Blast Shapes for Different Weapons
+  function punchBlastHole(x: number, y: number, baseRadius: number, shape: 'jagged' | 'star' | 'pellet' | 'laser' | 'huge' = 'jagged') {
     if (!pageCtx) return;
 
     pageCtx.globalCompositeOperation = 'destination-out';
     pageCtx.beginPath();
 
-    const points = 10;
-    for (let i = 0; i < points; i++) {
-      const angle = (i / points) * Math.PI * 2;
-      const r = radius * (0.75 + Math.random() * 0.5);
-      const px = x + Math.cos(angle) * r;
-      const py = y + Math.sin(angle) * r;
-      if (i === 0) pageCtx.moveTo(px, py);
-      else pageCtx.lineTo(px, py);
+    if (shape === 'star') {
+      // 5-Point Star Punch Hole (Magic Wand)
+      const points = 5;
+      const outerR = baseRadius * 1.3;
+      const innerR = baseRadius * 0.5;
+      for (let i = 0; i < points * 2; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const angle = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
+        const px = x + Math.cos(angle) * r;
+        const py = y + Math.sin(angle) * r;
+        if (i === 0) pageCtx.moveTo(px, py);
+        else pageCtx.lineTo(px, py);
+      }
+    } else if (shape === 'huge') {
+      // Massive Jagged Star-Burst Crater (Rocket / Nuke / Grenade)
+      const points = 16;
+      for (let i = 0; i < points; i++) {
+        const angle = (i / points) * Math.PI * 2;
+        const r = baseRadius * (0.65 + Math.random() * 0.7);
+        const px = x + Math.cos(angle) * r;
+        const py = y + Math.sin(angle) * r;
+        if (i === 0) pageCtx.moveTo(px, py);
+        else pageCtx.lineTo(px, py);
+      }
+    } else if (shape === 'pellet') {
+      // Shotgun single pellet bite
+      const points = 8;
+      for (let i = 0; i < points; i++) {
+        const angle = (i / points) * Math.PI * 2;
+        const r = baseRadius * (0.7 + Math.random() * 0.6);
+        const px = x + Math.cos(angle) * r;
+        const py = y + Math.sin(angle) * r;
+        if (i === 0) pageCtx.moveTo(px, py);
+        else pageCtx.lineTo(px, py);
+      }
+    } else {
+      // Standard Organic Jagged Bite Hole (Uzi / Gatling)
+      const points = 10;
+      for (let i = 0; i < points; i++) {
+        const angle = (i / points) * Math.PI * 2;
+        const r = baseRadius * (0.75 + Math.random() * 0.5);
+        const px = x + Math.cos(angle) * r;
+        const py = y + Math.sin(angle) * r;
+        if (i === 0) pageCtx.moveTo(px, py);
+        else pageCtx.lineTo(px, py);
+      }
     }
+
     pageCtx.closePath();
     pageCtx.fill();
 
-    spawnPaperShards(x, y, radius);
+    spawnPaperShards(x, y, baseRadius);
 
-    destructionPercent = Math.min(100, destructionPercent + Math.round(radius / 7));
+    destructionPercent = Math.min(100, destructionPercent + Math.max(1, Math.round(baseRadius / 8)));
     updateHUD();
   }
 
   function spawnPaperShards(x: number, y: number, radius: number) {
-    const count = Math.min(25, Math.floor(radius * 0.6));
+    const count = Math.min(30, Math.max(4, Math.floor(radius * 0.7)));
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 7 + 2;
+      const speed = Math.random() * 8 + 2;
       paperShards.push({
         x: x + (Math.random() - 0.5) * radius,
         y: y + (Math.random() - 0.5) * radius,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 2,
+        vy: Math.sin(angle) * speed - 3,
         rot: Math.random() * Math.PI * 2,
-        vRot: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 10 + 4,
-        color: Math.random() > 0.3 ? '#FFFFFF' : '#E2E8F0',
+        vRot: (Math.random() - 0.5) * 0.4,
+        size: Math.random() * 12 + 4,
+        color: Math.random() > 0.3 ? '#FFFFFF' : '#CBD5E1',
         life: 0,
-        maxLife: Math.random() * 40 + 30,
+        maxLife: Math.random() * 45 + 30,
       });
     }
   }
@@ -463,77 +503,79 @@ const {
     const angle = Math.atan2(mouseY - gunY, mouseX - gunX);
 
     if (currentWeapon === 'uzi') {
-      if (now - lastShotTime < 90) return;
+      if (now - lastShotTime < 80) return;
       lastShotTime = now;
       sfx.playGunshot();
       projectiles.push({
         x: gunX,
         y: gunY,
-        vx: Math.cos(angle) * 16,
-        vy: Math.sin(angle) * 16,
+        vx: Math.cos(angle) * 18,
+        vy: Math.sin(angle) * 18,
         type: 'bullet',
         radius: 3,
         life: 0,
         color: '#FFEA00',
       });
     } else if (currentWeapon === 'shotgun') {
-      if (now - lastShotTime < 350) return;
+      if (now - lastShotTime < 320) return;
       lastShotTime = now;
       sfx.playShotgun();
-      for (let i = -2; i <= 2; i++) {
-        const spread = angle + i * 0.08;
+      // True 6-Pellet Spread
+      for (let i = -2; i <= 3; i++) {
+        const spread = angle + (i + (Math.random() - 0.5) * 0.5) * 0.1;
         projectiles.push({
           x: gunX,
           y: gunY,
-          vx: Math.cos(spread) * (14 + Math.random() * 4),
-          vy: Math.sin(spread) * (14 + Math.random() * 4),
-          type: 'bullet',
-          radius: 4,
+          vx: Math.cos(spread) * (14 + Math.random() * 6),
+          vy: Math.sin(spread) * (14 + Math.random() * 6),
+          type: 'pellet',
+          radius: 3.5,
           life: 0,
           color: '#FF3366',
         });
       }
     } else if (currentWeapon === 'laser') {
       sfx.playLaser();
-      punchBlastHole(mouseX, mouseY, 16);
+      // Continuous Laser Slicing line
+      punchBlastHole(mouseX, mouseY, 14, 'laser');
     } else if (currentWeapon === 'magic') {
-      if (now - lastShotTime < 180) return;
+      if (now - lastShotTime < 160) return;
       lastShotTime = now;
       sfx.playMagic();
       projectiles.push({
         x: gunX,
         y: gunY,
-        vx: Math.cos(angle) * 12,
-        vy: Math.sin(angle) * 12,
+        vx: Math.cos(angle) * 13,
+        vy: Math.sin(angle) * 13,
         type: 'star',
         radius: 6,
         life: 0,
         color: '#00F0FF',
       });
     } else if (currentWeapon === 'rocket') {
-      if (now - lastShotTime < 500) return;
+      if (now - lastShotTime < 480) return;
       lastShotTime = now;
       sfx.playExplosion();
       projectiles.push({
         x: gunX,
         y: gunY,
-        vx: Math.cos(angle) * 10,
-        vy: Math.sin(angle) * 10,
+        vx: Math.cos(angle) * 11,
+        vy: Math.sin(angle) * 11,
         type: 'rocket',
         radius: 8,
         life: 0,
         color: '#FF0055',
       });
     } else if (currentWeapon === 'gatling') {
-      if (now - lastShotTime < 50) return;
+      if (now - lastShotTime < 45) return;
       lastShotTime = now;
       sfx.playGunshot();
-      const spread = angle + (Math.random() - 0.5) * 0.1;
+      const spread = angle + (Math.random() - 0.5) * 0.15;
       projectiles.push({
         x: gunX,
         y: gunY,
-        vx: Math.cos(spread) * 20,
-        vy: Math.sin(spread) * 20,
+        vx: Math.cos(spread) * 22,
+        vy: Math.sin(spread) * 22,
         type: 'bullet',
         radius: 3,
         life: 0,
@@ -543,13 +585,13 @@ const {
       if (now - lastShotTime < 2000) return;
       lastShotTime = now;
       sfx.playNuke();
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 10; i++) {
         setTimeout(() => {
           if (!pageCanvas) return;
           const rx = Math.random() * pageCanvas.width;
           const ry = Math.random() * pageCanvas.height;
-          punchBlastHole(rx, ry, 160);
-        }, i * 60);
+          punchBlastHole(rx, ry, 180, 'huge');
+        }, i * 50);
       }
     }
   }
@@ -562,8 +604,8 @@ const {
     projectiles.push({
       x: gunX,
       y: gunY,
-      vx: Math.cos(angle) * 11,
-      vy: Math.sin(angle) * 11 - 4,
+      vx: Math.cos(angle) * 12,
+      vy: Math.sin(angle) * 12 - 5,
       type: 'grenade',
       radius: 7,
       life: 0,
@@ -571,11 +613,16 @@ const {
     });
   }
 
+  let walkCycle = 0;
   function drawPlayer(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.translate(player.x, player.y);
     if (player.facing === -1) ctx.scale(-1, 1);
 
+    const isMoving = Math.abs(player.vx) > 0.5;
+    if (isMoving) walkCycle += 0.25;
+
+    // Jetpack animated flames if hovering
     if (player.jetpack) {
       ctx.fillStyle = '#00F0FF';
       ctx.fillRect(-16, 12, 6, Math.random() * 16 + 8);
@@ -583,24 +630,29 @@ const {
       ctx.fillRect(-14, 14, 4, Math.random() * 10 + 4);
     }
 
+    // Shadow on paper
     ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
     ctx.beginPath();
     ctx.ellipse(0, 24, 14, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // Body: Neon Orange Anime Outfit
     ctx.fillStyle = '#FF6B00';
     ctx.fillRect(-12, -14, 24, 24);
     ctx.fillStyle = '#FF9E00';
     ctx.fillRect(-8, -10, 16, 16);
 
+    // Jetpack Booster Backpack
     ctx.fillStyle = '#25093E';
     ctx.fillRect(-16, -10, 6, 18);
     ctx.fillStyle = '#00F0FF';
     ctx.fillRect(-16, -6, 2, 8);
 
+    // Head
     ctx.fillStyle = '#FFE5D9';
     ctx.fillRect(-11, -32, 22, 20);
 
+    // Long Kawaii Ears
     ctx.fillStyle = '#FF6B00';
     ctx.fillRect(-12, -44, 7, 14);
     ctx.fillRect(5, -44, 7, 14);
@@ -608,24 +660,32 @@ const {
     ctx.fillRect(-10, -42, 3, 10);
     ctx.fillRect(7, -42, 3, 10);
 
+    // Big Anime Eyes
     ctx.fillStyle = '#1A0033';
     ctx.fillRect(2, -26, 4, 8);
     ctx.fillRect(-7, -26, 4, 8);
+    // Eye sparkle
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(3, -25, 2, 3);
     ctx.fillRect(-6, -25, 2, 3);
 
+    // Cute Cheerful Blush
     ctx.fillStyle = '#FF4081';
     ctx.fillRect(4, -18, 4, 3);
     ctx.fillRect(-9, -18, 4, 3);
 
-    ctx.fillStyle = '#1A0033';
-    ctx.fillRect(-8, 10, 6, 12);
-    ctx.fillRect(2, 10, 6, 12);
-    ctx.fillStyle = '#FF4081';
-    ctx.fillRect(-10, 18, 8, 5);
-    ctx.fillRect(2, 18, 8, 5);
+    // Animated Running Legs
+    const legOffset1 = isMoving ? Math.sin(walkCycle) * 6 : 0;
+    const legOffset2 = isMoving ? -Math.sin(walkCycle) * 6 : 0;
 
+    ctx.fillStyle = '#1A0033';
+    ctx.fillRect(-8 + legOffset1, 10, 6, 12);
+    ctx.fillRect(2 + legOffset2, 10, 6, 12);
+    ctx.fillStyle = '#FF4081';
+    ctx.fillRect(-10 + legOffset1, 18, 8, 5);
+    ctx.fillRect(2 + legOffset2, 18, 8, 5);
+
+    // Pixel Weapon in Hand
     ctx.fillStyle = '#334155';
     ctx.fillRect(6, -6, 16, 7);
     ctx.fillStyle = '#FF4081';
@@ -640,18 +700,34 @@ const {
     if (fxCtx && fxCanvas) {
       fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
 
-      if (keys['KeyA'] || keys['ArrowLeft']) {
-        player.vx = -4;
+      // Multi-Input Check: Keyboard WASD / Arrows + Mouse Auto-Hop
+      const keyLeft = keys['KeyA'] || keys['ArrowLeft'] || keys['a'] || keys['A'];
+      const keyRight = keys['KeyD'] || keys['ArrowRight'] || keys['d'] || keys['D'];
+      const keyUp = keys['Space'] || keys['KeyW'] || keys['ArrowUp'] || keys['w'] || keys['W'];
+      const keyDown = keys['KeyS'] || keys['ArrowDown'] || keys['s'] || keys['S'];
+
+      if (keyLeft) {
+        player.vx = -4.5;
         player.facing = -1;
-      } else if (keys['KeyD'] || keys['ArrowRight']) {
-        player.vx = 4;
+      } else if (keyRight) {
+        player.vx = 4.5;
         player.facing = 1;
+      } else if (isMouseDown) {
+        // Smooth mouse auto-follow when firing
+        const dx = mouseX - player.x;
+        if (Math.abs(dx) > 35) {
+          player.vx = Math.sign(dx) * 3.8;
+          player.facing = Math.sign(dx) as 1 | -1;
+        } else {
+          player.vx *= 0.75;
+          player.facing = (mouseX >= player.x ? 1 : -1) as 1 | -1;
+        }
       } else {
         player.vx *= 0.8;
       }
 
-      if (keys['Space'] || keys['KeyW'] || keys['ArrowUp']) {
-        player.vy = -5.5;
+      if (keyUp) {
+        player.vy = -6;
         player.jetpack = true;
       } else {
         player.jetpack = false;
@@ -661,12 +737,11 @@ const {
       player.x += player.vx;
       player.y += player.vy;
 
-      const isDroppingDown = keys['KeyS'] || keys['ArrowDown'];
-      if (!isDroppingDown && player.vy >= 0) {
-        if (player.y >= 95 && player.y <= 112) {
+      if (!keyDown && player.vy >= 0) {
+        if (player.y >= 95 && player.y <= 114) {
           player.y = 105;
           player.vy = 0;
-        } else if (player.y >= 225 && player.y <= 242) {
+        } else if (player.y >= 225 && player.y <= 244) {
           player.y = 235;
           player.vy = 0;
         }
