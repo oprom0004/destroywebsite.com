@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import FAQSection from '../components/FAQSection.astro';
+import { WEAPONS } from '../data/weapons';
 
 const pageTitle = 'How to Play Destroy Website: Controls, Shortcuts & Weapon Tips';
-const pageDescription = 'Master Destroy Website with our comprehensive guide: keyboard shortcut numbers (1-7), mouse crosshair aim, touch gestures, combo scoring, and 100% wipeout tactics.';
+const pageDescription = 'Master Destroy Website with our comprehensive guide: keys 1–8, independent movement and aiming, grenades, webpage scrolling, and timed friend challenges.';
 
 const schemas = [
   {
@@ -22,7 +22,7 @@ const schemas = [
         '@type': 'HowToStep',
         position: 2,
         name: 'Select Your Weapon of Choice',
-        text: 'Choose from 8 weapons in the top armory ribbon or press keyboard keys 1 through 7 to switch instantaneously.',
+        text: 'Choose from 8 weapons in the bottom dock or press keys 1 through 8.',
       },
       {
         '@type': 'HowToStep',
@@ -34,7 +34,7 @@ const schemas = [
         '@type': 'HowToStep',
         position: 4,
         name: 'Achieve 100% Obliteration',
-        text: 'Chain hits together to build combo multipliers and wipe out 100% of the page elements to unlock the victory badge.',
+        text: 'Destroy the page area to increase your percentage, then share your score or challenge a friend.',
       },
     ],
   },
@@ -64,7 +64,7 @@ const schemas = [
         How to Play <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-pink to-neon-yellow">Destroy Website</span>
       </h1>
       <p class="text-sm sm:text-base text-destruct-muted max-w-xl mx-auto">
-        Complete keyboard shortcuts, aim controls, combo mechanics, and high-score strategies.
+        Keyboard shortcuts, aiming, long-page navigation and friend challenges.
       </p>
     </div>
 
@@ -80,34 +80,9 @@ const schemas = [
           <span class="text-destruct-muted">Left Click / Tap</span>
           <span class="font-bold text-neon-cyan">Attack / Fire Weapon</span>
         </div>
-        <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border">
-          <span class="text-destruct-muted">Key <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">1</kbd></span>
-          <span class="font-bold text-neon-yellow">🔨 Cyber Sledgehammer</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border">
-          <span class="text-destruct-muted">Key <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">2</kbd></span>
-          <span class="font-bold text-neon-cyan">⚡ Plasma Laser</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border">
-          <span class="text-destruct-muted">Key <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">3</kbd></span>
-          <span class="font-bold text-neon-pink">🚀 RPG Rocket</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border">
-          <span class="text-destruct-muted">Key <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">4</kbd></span>
-          <span class="font-bold text-neon-red">🔫 Vulcan Gatling</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border">
-          <span class="text-destruct-muted">Key <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">5</kbd></span>
-          <span class="font-bold text-orange-400">🔥 Flamethrower</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border">
-          <span class="text-destruct-muted">Key <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">6</kbd></span>
-          <span class="font-bold text-purple-400">🕳️ Singularity Black Hole</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border">
-          <span class="text-destruct-muted">Key <kbd class="px-1.5 py-0.5 bg-arcade-card rounded text-white">7</kbd></span>
-          <span class="font-bold text-neon-green">☢️ Tactical Nuke</span>
-        </div>
+        {WEAPONS.map(w => <div class="flex items-center justify-between p-3 bg-arcade-darkest rounded-xl border border-arcade-border"><span>{w.shortcut}</span><span class="font-bold text-neon-cyan">{w.name}</span></div>)}
+        <p>A / D or left / right arrows: move. Space: jump; hold to fly. S: descend.</p>
+        <p>Wheel: browse the webpage. Back to character: resume camera follow. Esc: pause.</p>
       </div>
     </section>
 
@@ -120,23 +95,23 @@ const schemas = [
 
       <div class="space-y-4 text-xs sm:text-sm text-destruct-muted leading-relaxed">
         <div class="p-4 bg-arcade-darkest rounded-2xl border border-arcade-border space-y-1.5">
-          <h3 class="font-bold text-white text-base">1. Build Up Massive Combo Multipliers</h3>
+          <h3 class="font-bold text-white text-base">1. Explore the Whole Page</h3>
           <p>
-            Hitting multiple webpage containers in rapid succession (within 1.5 seconds) triggers a <strong>Combo Streak</strong>. Chaining together 10+ hits boosts visual particle intensity and unlocks secret audio cues.
+            Hold S to drop through webpage platforms, or use the mouse wheel to inspect lower sections. Choose Back to character to resume following your character. Damage stays in place as you explore.
           </p>
         </div>
 
         <div class="p-4 bg-arcade-darkest rounded-2xl border border-arcade-border space-y-1.5">
           <h3 class="font-bold text-white text-base">2. Laser & Rocket Synergies</h3>
           <p>
-            Use the <strong>Plasma Laser Beam (Key 2)</strong> to carve deep fissures across dense paragraph cards, then finish the cluster off with an <strong>RPG Rocket (Key 3)</strong> to send hundreds of pixel fragments flying simultaneously.
+            Use the <strong>Laser Beam (Key 5)</strong> to carve deep fissures across dense paragraph cards, then finish the cluster off with an <strong>Rocket (Key 6)</strong> to send hundreds of pixel fragments flying simultaneously.
           </p>
         </div>
 
         <div class="p-4 bg-arcade-darkest rounded-2xl border border-arcade-border space-y-1.5">
           <h3 class="font-bold text-white text-base">3. Instant Reset & Benchmark</h3>
           <p>
-            Want to test how fast you can 100% obliterate a site? Hit the <strong>Reset Button (🔄)</strong> to instantly reconstruct the target DOM tree and start your speedrun timer!
+            Want to test how fast you can 100% obliterate a site? Hit the <strong>Reset Button (🔄)</strong> to restore the destructible page and start your speedrun timer!
           </p>
         </div>
       </div>

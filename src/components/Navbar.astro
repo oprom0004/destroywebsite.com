@@ -2,17 +2,17 @@
 const currentPath = Astro.url.pathname;
 
 const navLinks = [
-  { name: '🔥 Play Sandbox', href: '/' },
-  { name: '🎯 Targets', href: '/targets/' },
-  { name: '💣 Weapons Arsenal', href: '/weapons/' },
-  { name: '📜 How to Play', href: '/how-to-play/' },
-  { name: '⚡ Bookmarklet', href: '/bookmarklet/' },
-  { name: 'ℹ️ What is It?', href: '/what-is-destroy-website/' },
+  { name: 'Play', href: '/' },
+  { name: 'Targets', href: '/targets/' },
+  { name: 'Weapons', href: '/weapons/' },
+  { name: 'How to play', href: '/how-to-play/' },
+  { name: 'Bookmarklet', href: '/bookmarklet/' },
+  { name: 'About', href: '/what-is-destroy-website/' },
 ];
 ---
 
 <header class="sticky top-0 z-50 bg-arcade-darkest/90 backdrop-blur-md border-b border-arcade-border">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+  <div class="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
     <!-- Brand Logo -->
     <a href="/" class="flex items-center gap-2.5 group">
       <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-neon-pink to-neon-purple p-0.5 shadow-[0_0_15px_rgba(255,42,109,0.4)] group-hover:shadow-[0_0_25px_rgba(255,42,109,0.7)] transition-all">
@@ -22,21 +22,21 @@ const navLinks = [
       </div>
       <div>
         <div class="flex items-center gap-1.5">
-          <span class="font-black text-lg tracking-wider text-white group-hover:text-neon-pink transition-colors">
+          <span class="font-black text-base tracking-wide text-white group-hover:text-neon-pink transition-colors">
             DESTROY<span class="text-neon-cyan">WEBSITE</span>
           </span>
           <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-neon-pink/20 text-neon-pink border border-neon-pink/40 rounded">
-            v2.4
+            ARCADE
           </span>
         </div>
         <p class="text-[10px] text-destruct-dim font-mono tracking-tight -mt-0.5">
-          2D Arcade Web Demolition Sandbox
+          A little chaos. A lot of fun.
         </p>
       </div>
     </a>
 
     <!-- Desktop Navigation -->
-    <nav class="hidden md:flex items-center gap-1">
+    <nav class="hidden md:flex items-center gap-2 whitespace-nowrap">
       {navLinks.map((link) => {
         const isActive = currentPath === link.href;
         return (
@@ -60,7 +60,7 @@ const navLinks = [
         href="/#game-viewport"
         class="px-3.5 py-1.5 text-xs font-black bg-gradient-to-r from-neon-pink to-neon-purple hover:from-neon-pink hover:to-neon-pink text-white rounded-lg shadow-[0_0_15px_rgba(255,42,109,0.3)] hover:shadow-[0_0_20px_rgba(255,42,109,0.6)] transition-all flex items-center gap-1"
       >
-        <span>Instant Smash</span>
+        <span>Start playing</span>
         <span class="text-xs">⚡</span>
       </a>
     </div>

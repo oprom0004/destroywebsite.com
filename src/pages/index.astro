@@ -9,8 +9,8 @@ import BookmarkletBox from '../components/BookmarkletBox.astro';
 import { WEAPONS } from '../data/weapons';
 import { TARGET_SITES } from '../data/targets';
 
-const pageTitle = 'Destroy Any Website ✨ Kawaii Cyber-Arcade | Play Free in Browser';
-const pageDescription = 'Type any address and turn any website into a destructible 2D battleground! 8 kawaii weapons, paper tear physics, and instant in-browser demolition on destroywebsite.com. Free, no download.';
+const pageTitle = 'Destroy Any Website – Free Browser Game & Friend Challenges';
+const pageDescription = 'Play a free webpage destruction game with eight weapons. Move, fly, throw grenades, explore long pages and share timed score challenges with friends.';
 
 const schemas = [
   {
@@ -19,11 +19,6 @@ const schemas = [
     name: 'Destroy Any Website',
     url: 'https://destroywebsite.com/',
     description: 'Free online browser physics sandbox to smash and destroy any webpage.',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: 'https://destroywebsite.com/?target={search_term_string}',
-      'query-input': 'required name=search_term_string',
-    },
   },
   {
     '@context': 'https://schema.org',
@@ -43,30 +38,22 @@ const schemas = [
 ---
 
 <Layout title={pageTitle} description={pageDescription} schema={schemas}>
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-16">
-    <!-- Hero Header -->
-    <section class="text-center space-y-4 max-w-3xl mx-auto">
-      <div class="inline-flex items-center gap-2">
-        <span class="px-3.5 py-1 bg-neon-pink/15 text-neon-pink border border-neon-pink/30 text-xs font-black rounded-full font-mono uppercase tracking-wider shadow-[0_0_15px_rgba(255,42,109,0.3)]">
-          ✨ Kawaii Cyber-Arcade Edition · Play Free in Browser
-        </span>
-      </div>
-
-      <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
-        Destroy <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-pink via-neon-yellow to-neon-cyan font-pixel">Any Website</span>
-      </h1>
-
-      <p class="text-sm sm:text-base text-destruct-muted leading-relaxed">
-        Type any web address, smash everything with cute weapons, and reveal the neon synthwave universe behind the page!
-      </p>
-    </section>
-
-    <!-- Main Interactive Game Sandbox -->
+  <header class="px-5 py-2 flex flex-wrap items-center justify-between gap-2">
+    <h1 class="text-lg sm:text-xl font-bold text-white">Destroy Any Website</h1>
+    <p class="text-xs text-destruct-muted">Smash webpages with 8 weapons. Share your score and challenge a friend.</p>
+  </header>
+  <div class="px-2 sm:px-3 pt-2 pb-3">
     <DestructionGame />
-
+  </div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 space-y-12">
     <!-- GEO / Google AI Overview Key Fact Block -->
     <GEOQuickAnswer />
 
+    <section class="space-y-3" aria-labelledby="friend-challenges">
+      <h2 id="friend-challenges" class="text-2xl font-bold text-white">How do friend challenges work?</h2>
+      <p class="text-destruct-muted">Destroy part of a page, then choose “Challenge a friend” in the game. Your link includes the target, destruction percentage and time limit. Your friend opens it and accepts the challenge to start their timer. Reach the score before time runs out to win.</p>
+      <p class="text-sm text-destruct-muted">These are separate score challenges, not live multiplayer rooms. Demo pages have a consistent layout; live website previews may change. Share score also lets you download a demolition report or open an X post.</p>
+    </section>
     <!-- Popular Destructible Targets -->
     <section class="space-y-6">
       <div class="flex items-center justify-between flex-wrap gap-4 border-b border-arcade-border pb-3">
@@ -76,11 +63,11 @@ const schemas = [
             <span>Popular Target Presets</span>
           </h2>
           <p class="text-xs sm:text-sm text-destruct-muted">
-            Instant 1-click destruction simulations with custom DOM layouts.
+            Choose a target domain, or play an instant local demo above.
           </p>
         </div>
         <a href="/targets/" class="text-xs font-mono font-bold text-neon-cyan hover:underline flex items-center gap-1">
-          <span>View All 15+ Targets</span>
+          <span>View All Targets</span>
           <span>→</span>
         </a>
       </div>
@@ -101,7 +88,7 @@ const schemas = [
             <span>Destructive Weapon Armory</span>
           </h2>
           <p class="text-xs sm:text-sm text-destruct-muted">
-            From kinetic sledgehammers to apocalyptic tactical nukes and gravity black holes.
+            Eight selectable weapons. Switch with 1–8; use the mouse wheel to explore the page.
           </p>
         </div>
         <a href="/weapons/" class="text-xs font-mono font-bold text-neon-pink hover:underline flex items-center gap-1">
@@ -138,7 +125,7 @@ const schemas = [
         </div>
         <div class="p-4 bg-arcade-darkest/80 rounded-2xl border border-arcade-border space-y-1.5">
           <span class="text-neon-cyan font-bold text-sm block">2. Unleash 8 Weapons</span>
-          <p class="text-destruct-dim">Chain together laser cuts, rocket fireballs, and gravity black holes for massive combo scores.</p>
+          <p class="text-destruct-dim">Cut with lasers, fire rockets, and throw grenades. Progress tracks the page area you actually destroy.</p>
         </div>
         <div class="p-4 bg-arcade-darkest/80 rounded-2xl border border-arcade-border space-y-1.5">
           <span class="text-neon-green font-bold text-sm block">3. 100% Instant Catharsis</span>

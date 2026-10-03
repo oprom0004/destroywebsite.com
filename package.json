@@ -7,7 +7,9 @@
     "start": "astro dev",
     "build": "astro build && node scripts/copy-sitemap.js",
     "postbuild": "node scripts/copy-sitemap.js",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "check:game": "tsc --noEmit --strict --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --lib ES2022,DOM --types vite/client src/lib/game/engine.ts src/lib/game/terrain.ts src/lib/game/scenes.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.1",

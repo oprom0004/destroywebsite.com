@@ -28,8 +28,8 @@ const { weapon } = Astro.props;
       </div>
     </div>
     <div class="text-right font-mono">
-      <span class="text-xs text-destruct-dim">DPS</span>
-      <p class="text-sm font-black text-white">{weapon.dps.toLocaleString()}</p>
+      <span class="text-xs text-destruct-dim">Control</span>
+      <p class="text-sm font-black text-white">{weapon.shortcut}</p>
     </div>
   </div>
 
@@ -41,15 +41,16 @@ const { weapon } = Astro.props;
   <!-- Specs Grid -->
   <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-arcade-darkest/70 p-3 rounded-xl border border-arcade-border">
     <div>
-      <span class="text-destruct-dim block">Blast Radius</span>
+      <span class="text-destruct-dim block">Damage area</span>
       <span class="text-destruct-text font-bold">{weapon.radius}</span>
     </div>
     <div>
-      <span class="text-destruct-dim block">Rate of Fire</span>
+      <span class="text-destruct-dim block">Firing interval</span>
       <span class="text-destruct-text font-bold">{weapon.rateOfFire}</span>
     </div>
   </div>
 
+  <a href={"/?target=demo%3Acandy&weapon=" + weapon.id + "#game-viewport"} class="text-sm text-neon-cyan hover:underline">Try {weapon.name} →</a>
   <!-- Bottom: Unlock Status -->
   <div class="pt-2 border-t border-arcade-border/50 flex items-center justify-between text-[11px] font-mono">
     <span class="text-destruct-dim">Unlock:</span>

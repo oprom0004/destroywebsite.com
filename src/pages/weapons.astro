@@ -3,8 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import WeaponCard from '../components/WeaponCard.astro';
 import { WEAPONS } from '../data/weapons';
 
-const pageTitle = 'Destroy Website Weapons Armory: Stats, DPS & Superweapon Guide';
-const pageDescription = 'Explore the complete Destroy Website weapon catalog: Cyber Sledgehammer, Plasma Laser, RPG Rockets, Vulcan Gatling, Black Hole Vortex, and Tactical Quantum Nuke.';
+const pageTitle = 'Destroy Website Weapons: 8 Weapons, Controls & Blast Sizes';
+const pageDescription = 'Compare Pistol, Uzi, Shotgun, Gatling, Laser Beam, Rocket, Cannon and Grenade. Learn keys 1–8, blast sizes, firing intervals and how each weapon works.';
 
 const schemas = [
   {
@@ -16,7 +16,7 @@ const schemas = [
       '@type': 'ListItem',
       position: i + 1,
       name: w.name,
-      description: `${w.tagline} - DPS: ${w.dps}`,
+      description: `${w.tagline} - Control: ${w.shortcut}`,
     })),
   },
   {
@@ -48,10 +48,15 @@ const schemas = [
         Destruction <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-pink via-neon-yellow to-neon-cyan">Weapon Armory</span>
       </h1>
       <p class="text-sm sm:text-base text-destruct-muted">
-        Inspect damage per second (DPS), blast radius, firing mechanics, and unlock conditions for every weapon.
+        Inspect keyboard shortcuts, blast sizes, and firing mechanics. All weapons are available from the start.
       </p>
     </div>
 
+    <section class="text-sm text-destruct-muted space-y-2">
+      <h2 class="text-xl font-bold text-white">Choosing and using weapons</h2>
+      <p>Press 1–8 or select a weapon in the dock, then aim and hold the left mouse button to fire. Select Grenade with 8, or throw one with G or right click without switching weapons. A/D and arrow keys move independently of aiming. The mouse wheel browses the webpage.</p>
+      <p>All eight weapons are available immediately. Sizes below use game-world pixels; firing intervals are the minimum time between shots. Destruction measures removed webpage area, not enemy damage or DPS.</p>
+    </section>
     <!-- Weapons Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {WEAPONS.map((weapon) => (
@@ -64,23 +69,23 @@ const schemas = [
       <div class="space-y-3 max-w-xl">
         <div class="inline-flex items-center gap-2">
           <span class="px-2.5 py-0.5 bg-neon-green/20 text-neon-green border border-neon-green/50 text-[10px] font-mono font-black rounded uppercase">
-            ☢️ Tier 0 Superweapon
+            ☢️ Cluster Cannon
           </span>
-          <span class="text-xs font-mono text-destruct-dim">DPS: 99,999 (100% Instant Wipeout)</span>
+          <span class="text-xs font-mono text-destruct-dim">Keyboard: 7 · 1.8 second cooldown</span>
         </div>
         <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-          Tactical Quantum Nuke
+          Cannon
         </h3>
         <p class="text-xs sm:text-sm text-destruct-muted leading-relaxed">
-          The ultimate weapon for when a webpage refuses to cooperate. Triggering the Tactical Nuke unleashes a multi-kiloton virtual blast wave that instantly wipes out every DOM container, navigation bar, and ad banner across the entire screen.
+          Fire a heavy projectile at your crosshair. Its first blast triggers five smaller explosions nearby, tearing out webpage fragments and revealing the world behind them.
         </p>
       </div>
 
       <a
-        href="/#game-viewport"
+        href="/?target=demo%3Acandy&amp;weapon=nuke#game-viewport"
         class="shrink-0 px-6 py-3.5 bg-neon-green hover:bg-neon-green/80 text-arcade-darkest font-black text-xs sm:text-sm rounded-xl shadow-[0_0_25px_rgba(0,245,155,0.4)] transition-all font-mono uppercase"
       >
-        ☢️ Test Nuke in Sandbox
+        ☢️ Try the Cannon
       </a>
     </div>
   </div>

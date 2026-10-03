@@ -15,7 +15,7 @@ interface Props {
 const {
   title,
   description,
-  canonical = Astro.url.href,
+  canonical = new URL(Astro.url.pathname, Astro.site || 'https://destroywebsite.com').href,
   image = 'https://destroywebsite.com/og-image.jpg',
   type = 'website',
   schema = [],
